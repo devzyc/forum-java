@@ -67,3 +67,4 @@ buildNumber.properties
 node_modules/
 vue-admin.html
 
+/.java-version
