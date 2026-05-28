@@ -19,6 +19,7 @@ import pub.developers.forum.api.service.ArticleApiService;
 import pub.developers.forum.api.service.FaqApiService;
 import pub.developers.forum.api.service.UserApiService;
 import pub.developers.forum.common.constant.Constant;
+import pub.developers.forum.common.enums.ErrorCodeEn;
 import pub.developers.forum.common.support.GlobalViewConfig;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.portal.request.UserRequest;
@@ -219,5 +220,51 @@ public class UserController {
         return webUtil.buildPager(request.getPageNo(), queryPath, pageResponseModel);
     }
 
+    /**
+     * 新增：获取指定用户的文章列表 REST API
+     * 通过可选参数控制是否分页
+     * 当 pageNO 和 pageSize 都未提供时，返回所有文章
+     * 当提供 pageNO 和 pageSize 时，返回分页结果
+     */
+    @GetMapping("/articles/{uid}")
+    @ResponseBody
+    public ResultModel<?> getUserArticles(
+            @PathVariable("uid") Long uid,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            HttpServletRequest request) {
 
+        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
+
+        // 如果没有提供分页参数，则获取所有文章
+        if (pageNo == null || pageSize == null) {
+            // 构建查询条件，一次性获取所有文章
+            PageRequestModel<ArticleAuthorPageRequest> pageRequestModel = new PageRequestModel<>();
+            pageRequestModel.setPageNo(1);
+            pageRequestModel.setPageSize(9999); // 获取所有文章
+            pageRequestModel.setFilter(ArticleAuthorPageRequest.builder()
+                    .userId(uid)
+                    .build());
+
+            ResultModel<PageResponseModel<ArticleUserPageResponse>> result =
+                    articleApiService.authorPage(pageRequestModel);
+
+            // 提取列表数据返回
+            if (result.getSuccess() && result.getData() != null) {
+                return WebUtil.success(result.getData().getList());
+            } else {
+                return WebUtil.success(new ArrayList<>());
+            }
+        } else {
+            // 提供了分页参数，返回分页结果
+            PageRequestModel<ArticleAuthorPageRequest> pageRequestModel = new PageRequestModel<>();
+            pageRequestModel.setPageNo(pageNo);
+            pageRequestModel.setPageSize(pageSize);
+            pageRequestModel.setFilter(ArticleAuthorPageRequest.builder()
+                    .userId(uid)
+                    .build());
+
+            return articleApiService.authorPage(pageRequestModel);
+        }
+    }
 }

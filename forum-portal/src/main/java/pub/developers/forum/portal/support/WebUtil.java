@@ -23,6 +23,7 @@ import pub.developers.forum.api.service.TagApiService;
 import pub.developers.forum.api.vo.PostsVO;
 import pub.developers.forum.common.constant.Constant;
 import pub.developers.forum.common.enums.ConfigTypeEn;
+import pub.developers.forum.common.enums.ErrorCodeEn;
 import pub.developers.forum.common.support.GlobalViewConfig;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.common.support.StringUtil;
@@ -501,4 +502,19 @@ public class WebUtil {
         return l1 % l2 > 0 ? l1 / l2 + 1 : l1 / l2;
     }
 
+    public static <T> ResultModel<T> success(T data) {
+        ResultModel<T> resultModel = new ResultModel<T>();
+        resultModel.setData(data);
+
+        return resultModel;
+    }
+
+    public static ResultModel fail(ErrorCodeEn errorCode) {
+        ResultModel resultModel = new ResultModel();
+        resultModel.setCode(errorCode.getCode());
+        resultModel.setMessage(errorCode.getMessage());
+        resultModel.setSuccess(Boolean.FALSE);
+
+        return resultModel;
+    }
 }
