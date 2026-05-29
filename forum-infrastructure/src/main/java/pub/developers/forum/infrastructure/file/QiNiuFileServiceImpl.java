@@ -40,7 +40,7 @@ public class QiNiuFileServiceImpl implements FileService {
             // 如果报错，可参考这篇文档：https://www.developers.pub/article/299
 
             // 这个位置需要注意  Region.huanan() 表示的是华南地区， 空间开了那个地区就填那个地区。
-            Configuration cfg = new Configuration(Region.huanan());
+            Configuration cfg = new Configuration(Region.regionAs0());
 
             UploadManager uploadManager = new UploadManager(cfg);
 
