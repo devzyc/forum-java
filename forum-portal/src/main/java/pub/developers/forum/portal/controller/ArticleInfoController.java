@@ -3,9 +3,7 @@ package pub.developers.forum.portal.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import pub.developers.forum.api.model.PageRequestModel;
 import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.model.ResultModel;
@@ -146,4 +144,45 @@ public class ArticleInfoController {
         return postsList;
     }
 
+    /**
+     * 新增：获取指定文章的评论列表 REST API
+     * 通过可选参数控制是否分页
+     * 当 pageNo 和 pageSize 都未提供时，返回所有评论
+     * 当提供 pageNo 和 pageSize 时，返回分页结果
+     */
+    @GetMapping("/comments/{articleId}")
+    @ResponseBody
+    public ResultModel<?> getArticleComments(
+            @PathVariable("articleId") Long articleId,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            HttpServletRequest request) {
+
+        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebContext.getCurrentSid());
+
+        // 如果没有提供分页参数，则获取所有评论
+        if (pageNo == null || pageSize == null) {
+            PageRequestModel<Long> pageRequestModel = new PageRequestModel<>();
+            pageRequestModel.setPageNo(1);
+            pageRequestModel.setPageSize(9999);
+            pageRequestModel.setFilter(articleId);
+
+            ResultModel<PageResponseModel<CommentPageResponse>> result = commentApiService.page(pageRequestModel);
+
+            // 提取列表数据返回
+            if (result.getSuccess() && result.getData() != null) {
+                return WebUtil.success(result.getData().getList());
+            } else {
+                return WebUtil.success(new ArrayList<>());
+            }
+        } else {
+            // 提供了分页参数，返回分页结果
+            PageRequestModel<Long> pageRequestModel = new PageRequestModel<>();
+            pageRequestModel.setPageNo(pageNo);
+            pageRequestModel.setPageSize(pageSize);
+            pageRequestModel.setFilter(articleId);
+
+            return commentApiService.page(pageRequestModel);
+        }
+    }
 }
