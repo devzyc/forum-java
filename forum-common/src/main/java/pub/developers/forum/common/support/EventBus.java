@@ -39,9 +39,6 @@ public class EventBus {
         POSTS_INFO,
         POSTS_DELETE,
 
-        FAQ_CREATE,
-        FAQ_UPDATE,
-
         APPROVAL_CREATE,
 
         COMMENT_CREATE,

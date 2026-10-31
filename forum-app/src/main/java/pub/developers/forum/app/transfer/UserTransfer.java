@@ -1,6 +1,5 @@
 package pub.developers.forum.app.transfer;
 
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.api.request.user.UserAdminPageRequest;
 import pub.developers.forum.api.request.user.UserRegisterRequest;
@@ -70,22 +69,6 @@ public class UserTransfer {
         }
 
         return users.stream().map(UserTransfer::buildUserPageResponse).collect(Collectors.toList());
-    }
-
-    public static User toGithubUser(JSONObject githubUser, String email, String nickname, String signature, String avatar) {
-        return User.builder()
-                .email(email)
-                .state(UserStateEn.UN_ACTIVATION)
-                .source(UserSourceEn.GITHUB)
-                .nickname(nickname)
-                .password(StringUtil.md5UserPassword(email))
-                .signature(signature)
-                .role(UserRoleEn.USER)
-                .avatar(avatar)
-                .sex(UserSexEn.UNKNOWN)
-                .githubUser(githubUser)
-                .lastLoginTime(new Date())
-                .build();
     }
 
     public static User toUser(UserRegisterRequest request) {

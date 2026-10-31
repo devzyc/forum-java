@@ -15,7 +15,6 @@ public enum UserSourceEn {
      *
      */
     REGISTER("REGISTER", "注册"),
-    GITHUB("GITHUB", "github"),
     ;
 
     private String value;

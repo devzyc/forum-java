@@ -59,8 +59,6 @@ public class MessageApprovalCreateListener extends EventBus.EventHandler<Pair<Lo
                 .build();
         if (PostsCategoryEn.ARTICLE.equals(basePosts.getCategory())) {
             message.setType(MessageTypeEn.APPROVAL_ARTICLE);
-        } else if (PostsCategoryEn.FAQ.equals(basePosts.getCategory())) {
-            message.setType(MessageTypeEn.APPROVAL_FAQ);
         } else {
             return;
         }

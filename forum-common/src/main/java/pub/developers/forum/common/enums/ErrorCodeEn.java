@@ -19,7 +19,6 @@ public enum ErrorCodeEn {
     NO_PERMISSION(9993, "无操作权限"),
     REPEAT_OPERATION(9992, "重复操作"),
     OPERATION_DATA_NOT_EXIST(9991, "操作数据不存在"),
-    GITHUB_OAUTH_ERROR(9990, "github 授权异常"),
 
     // 0500~0750 common error
     COMMON_CACHE_KEY_EMPTY(8999, "缓存 key 不能为空"),
@@ -62,8 +61,6 @@ public enum ErrorCodeEn {
     ARTICLE_NOT_EXIST(5998, "文章不存在"),
     ARTICLE_IN_AUDIT_PROCESS(5997, "文章审核中"),
 
-    FAQ_NOT_EXIST(4999, "问答不存在"),
-    FAQ_IN_AUDIT_PROCESS(4998, "问答审核中"),
 
     FILE_UPLOAD_FAIL(4998, "文件上传失败"),
     FILE_UPLOAD_NOT_SUPPORT_IMG_TYPE(4997, "不支持的图片类型"),

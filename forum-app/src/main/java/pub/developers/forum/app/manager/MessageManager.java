@@ -66,8 +66,6 @@ public class MessageManager {
             userIds.add(Long.valueOf(message1.getSender().getId()));
 
             if (MessageTypeEn.APPROVAL_ARTICLE.equals(message.getType())
-                    || MessageTypeEn.APPROVAL_FAQ.equals(message.getType())
-                    || MessageTypeEn.COMMENT_FAQ.equals(message.getType())
                     || MessageTypeEn.COMMENT_ARTICLE.equals(message.getType())) {
                 postsIds.add(Long.valueOf(message1.getTitle()));
             }

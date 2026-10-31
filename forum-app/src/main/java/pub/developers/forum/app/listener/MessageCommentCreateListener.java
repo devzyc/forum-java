@@ -86,8 +86,6 @@ public class MessageCommentCreateListener extends EventBus.EventHandler<Map<Stri
 
         if (PostsCategoryEn.ARTICLE.equals(categoryEn)) {
             message.setType(MessageTypeEn.COMMENT_ARTICLE);
-        } else if (PostsCategoryEn.FAQ.equals(categoryEn)) {
-            message.setType(MessageTypeEn.COMMENT_FAQ);
         } else {
             return;
         }

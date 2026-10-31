@@ -11,7 +11,6 @@ public interface WebConst {
 //    Integer PAGE_SIZE = 10;
 
     String DOMAIN_ARTICLE = "article";
-    String DOMAIN_FAQ = "faq";
     String DOMAIN_INTEREST = "interest";
 
     String COOKIE_SID_KEY = "sid";

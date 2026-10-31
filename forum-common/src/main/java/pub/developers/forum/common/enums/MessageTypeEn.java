@@ -15,9 +15,6 @@ public enum MessageTypeEn {
     APPROVAL_ARTICLE("APPROVAL_ARTICLE", "点赞文章"),
     COMMENT_ARTICLE("COMMENT_ARTICLE", "评论文章"),
 
-    APPROVAL_FAQ("APPROVAL_FAQ", "关注问答"),
-    COMMENT_FAQ("COMMENT_FAQ", "评论问答"),
-
     FOLLOW_USER("FOLLOW_USER", "用户关注"),
     ;
     private String value;

@@ -28,8 +28,6 @@ public class MessagePostsDeleteListener extends EventBus.EventHandler<BasePosts>
     @Override
     public void onMessage(BasePosts basePosts) {
         messageRepository.deleteInTypesAndTitle(Arrays.asList(MessageTypeEn.APPROVAL_ARTICLE
-                , MessageTypeEn.APPROVAL_FAQ
-                , MessageTypeEn.COMMENT_ARTICLE
-                , MessageTypeEn.COMMENT_FAQ), basePosts.getId().toString());
+                , MessageTypeEn.COMMENT_ARTICLE), basePosts.getId().toString());
     }
 }

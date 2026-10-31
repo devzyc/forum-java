@@ -50,25 +50,6 @@ public class PostsTransfer {
         return res;
     }
 
-    public static List<Faq> toFaqs(List<PostsDO> postsDOS
-            , List<User> users
-            , List<TagPostsMappingDO> tagPostsMappingDOS
-            , List<Tag> tags) {
-        List<Faq> faqs = new ArrayList<>();
-
-        SafesUtil.ofList(postsDOS).forEach(postsDO -> {
-            SafesUtil.ofList(users).forEach(user -> {
-                if (!postsDO.getAuthorId().equals(user.getId())) {
-                    return;
-                }
-
-                faqs.add(toFaq(postsDO, user, toTags(postsDO, tagPostsMappingDOS, tags)));
-            });
-        });
-
-        return faqs;
-    }
-
     public static List<Article> toArticles(List<PostsDO> postsDOS
             , List<User> users
             , List<TagPostsMappingDO> tagPostsMappingDOS
@@ -123,23 +104,6 @@ public class PostsTransfer {
         return postsDO;
     }
 
-    public static PostsDO toPostsDO(Faq faq) {
-        PostsDO postsDO = PostsDO.builder()
-                .category(PostsCategoryEn.FAQ.getValue())
-                .commentId(faq.getSolutionId())
-                .headImg("")
-                .marrow(false)
-                .official(false)
-                .sort(1000L)
-                .top(false)
-                .typeId(0L)
-                .build();
-
-        pickPostsDO(postsDO, faq);
-
-        return postsDO;
-    }
-
     private static void pickPostsDO(PostsDO postsDO, BasePosts basePosts) {
         postsDO.initBase();
         postsDO.setId(basePosts.getId());
@@ -167,16 +131,6 @@ public class PostsTransfer {
         pickBasePosts(article, postsDO, user, tags);
 
         return article;
-    }
-
-    public static Faq toFaq(PostsDO postsDO, User user, List<Tag> tags) {
-        Faq faq = Faq.builder()
-                .solutionId(postsDO.getCommentId())
-                .build();
-
-        pickBasePosts(faq, postsDO, user, tags);
-
-        return faq;
     }
 
     public static List<BasePosts> toBasePostsList(List<PostsDO> postsDOs) {

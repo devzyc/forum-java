@@ -3,9 +3,7 @@ package pub.developers.forum.infrastructure.transfer;
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.common.enums.AuditStateEn;
 import pub.developers.forum.common.support.SafesUtil;
-import pub.developers.forum.domain.entity.Faq;
 import pub.developers.forum.domain.entity.Tag;
-import pub.developers.forum.infrastructure.dal.dataobject.PostsDO;
 import pub.developers.forum.infrastructure.dal.dataobject.TagDO;
 
 import java.util.ArrayList;
@@ -17,21 +15,6 @@ import java.util.List;
  * @desc
  **/
 public class TagTransfer {
-
-    public static List<Faq> toFaqs(List<PostsDO> postsDOS) {
-        List<Faq> faqs = new ArrayList<>();
-
-        SafesUtil.ofList(postsDOS).forEach(postsDO -> {
-            Faq faq = new Faq();
-            faq.setId(postsDO.getId());
-            faq.setTitle(postsDO.getTitle());
-            faq.setCreateAt(postsDO.getCreateAt());
-
-            faqs.add(faq);
-        });
-
-        return faqs;
-    }
 
     public static TagDO toTagDO(Tag tag) {
         TagDO tagDO = TagDO.builder()

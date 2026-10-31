@@ -1,11 +1,19 @@
 package pub.developers.forum.portal.controller.rest;
 
 import com.google.common.collect.Sets;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import pub.developers.forum.api.model.PageRequestModel;
+import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.model.ResultModel;
+import pub.developers.forum.api.request.article.ArticleAuthorPageRequest;
 import pub.developers.forum.api.request.file.FileUploadImgRequest;
 import pub.developers.forum.api.request.user.*;
+import pub.developers.forum.api.response.article.ArticleUserPageResponse;
+import pub.developers.forum.api.response.user.UserInfoResponse;
+import pub.developers.forum.api.response.user.UserPageResponse;
+import pub.developers.forum.api.service.ArticleApiService;
 import pub.developers.forum.api.service.FileApiService;
 import pub.developers.forum.api.service.UserApiService;
 import pub.developers.forum.common.constant.Constant;
@@ -18,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -31,6 +40,9 @@ public class UserRestController {
 
     @Resource
     private UserApiService userApiService;
+
+    @Resource
+    private ArticleApiService articleApiService;
 
     @Resource
     private FileApiService fileApiService;
@@ -125,5 +137,84 @@ public class UserRestController {
         request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
 
         return userApiService.cancelFollow(followed);
+    }
+
+    /**
+     * 获取当前登录用户信息（登录成功后小程序用 sid cookie 换取自己的 uid）
+     */
+    @GetMapping("/current")
+    public ResultModel<UserInfoResponse> current(HttpServletRequest request) {
+        String sid = WebUtil.cookieGetSid(request);
+        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, sid);
+
+        return userApiService.info(sid);
+    }
+
+    /**
+     * 获取指定用户的文章列表 REST API
+     * 通过可选参数控制是否分页
+     * 当 pageNo 和 pageSize 都未提供时，返回所有文章
+     * 当提供 pageNo 和 pageSize 时，返回分页结果
+     */
+    @GetMapping("/articles/{uid}")
+    public ResultModel<?> getUserArticles(
+            @PathVariable("uid") Long uid,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            HttpServletRequest request) {
+
+        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
+
+        PageRequestModel<ArticleAuthorPageRequest> pageRequestModel = new PageRequestModel<>();
+        pageRequestModel.setPageNo(ObjectUtils.isEmpty(pageNo) ? 1 : pageNo);
+        pageRequestModel.setPageSize(ObjectUtils.isEmpty(pageSize) ? 9999 : pageSize);
+        pageRequestModel.setFilter(ArticleAuthorPageRequest.builder()
+                .userId(uid)
+                .build());
+
+        ResultModel<PageResponseModel<ArticleUserPageResponse>> result = articleApiService.authorPage(pageRequestModel);
+
+        // 未分页时只返回列表数据
+        if (ObjectUtils.isEmpty(pageNo) || ObjectUtils.isEmpty(pageSize)) {
+            if (result.getSuccess() && result.getData() != null) {
+                return WebUtil.success(result.getData().getList());
+            }
+            return WebUtil.success(new ArrayList<>());
+        }
+
+        return result;
+    }
+
+    /**
+     * 获取指定用户的关注列表 REST API
+     * 通过可选参数控制是否分页
+     * 当 pageNo 和 pageSize 都未提供时，返回所有关注的人
+     * 当提供 pageNo 和 pageSize 时，返回分页结果
+     */
+    @GetMapping("/followers/{uid}")
+    public ResultModel<?> getFollowers(
+            @PathVariable("uid") Long uid,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            HttpServletRequest request) {
+
+        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
+
+        PageRequestModel<Long> pageRequestModel = new PageRequestModel<>();
+        pageRequestModel.setPageNo(ObjectUtils.isEmpty(pageNo) ? 1 : pageNo);
+        pageRequestModel.setPageSize(ObjectUtils.isEmpty(pageSize) ? 9999 : pageSize);
+        pageRequestModel.setFilter(uid);
+
+        ResultModel<PageResponseModel<UserPageResponse>> result = userApiService.pageFollower(pageRequestModel);
+
+        // 未分页时只返回列表数据
+        if (ObjectUtils.isEmpty(pageNo) || ObjectUtils.isEmpty(pageSize)) {
+            if (result.getSuccess() && result.getData() != null) {
+                return WebUtil.success(result.getData().getList());
+            }
+            return WebUtil.success(new ArrayList<>());
+        }
+
+        return result;
     }
 }
