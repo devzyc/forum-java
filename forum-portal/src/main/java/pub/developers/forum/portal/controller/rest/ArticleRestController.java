@@ -10,12 +10,9 @@ import pub.developers.forum.api.response.article.ArticleQueryTypesResponse;
 import pub.developers.forum.api.response.comment.CommentPageResponse;
 import pub.developers.forum.api.service.ArticleApiService;
 import pub.developers.forum.api.service.CommentApiService;
-import pub.developers.forum.common.constant.Constant;
 import pub.developers.forum.portal.support.WebUtil;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,22 +32,17 @@ public class ArticleRestController {
     private CommentApiService commentApiService;
 
     @PostMapping("/save")
-    public ResultModel<Long> save(@RequestBody ArticleSaveArticleRequest articleRequest, HttpServletRequest request, HttpServletResponse response) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel<Long> save(@RequestBody ArticleSaveArticleRequest articleRequest) {
         return articleApiService.saveArticle(articleRequest);
     }
 
     @PostMapping("/{id}")
-    public ResultModel<ArticleInfoResponse> get(@PathVariable("id") Long id, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
+    public ResultModel<ArticleInfoResponse> get(@PathVariable("id") Long id) {
         return articleApiService.info(id);
     }
 
     @PostMapping("/editArticleTypes")
-    public ResultModel<List<ArticleQueryTypesResponse>> getAllType(HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel<List<ArticleQueryTypesResponse>> getAllType() {
         return articleApiService.queryEditArticleTypes();
     }
 
@@ -64,11 +56,7 @@ public class ArticleRestController {
     public ResultModel<?> getArticleComments(
             @PathVariable("articleId") Long articleId,
             @RequestParam(required = false) Integer pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            HttpServletRequest request) {
-
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+            @RequestParam(required = false) Integer pageSize) {
         PageRequestModel<Long> pageRequestModel = new PageRequestModel<>();
         pageRequestModel.setPageNo(pageNo == null ? 1 : pageNo);
         pageRequestModel.setPageSize(pageSize == null ? 9999 : pageSize);

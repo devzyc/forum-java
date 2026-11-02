@@ -141,6 +141,17 @@ public class UserManager extends AbstractLoginManager {
     }
 
     /**
+     * 当前登录用户详情
+     * <p>
+     * 登录上下文由 LoginUserAspect 根据 token 填充，取不到就是未登录，
+     * 由 IsLoginAspect 抛 USER_NOT_LOGIN，前端据此得到 401
+     */
+    @IsLogin
+    public UserInfoResponse current() {
+        return UserTransfer.toUserInfoResponse(LoginUserContext.getUser());
+    }
+
+    /**
      * 用户注册
      * @param request
      */

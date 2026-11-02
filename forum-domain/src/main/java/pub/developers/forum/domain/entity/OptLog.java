@@ -1,11 +1,11 @@
 package pub.developers.forum.domain.entity;
 
-import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import pub.developers.forum.common.enums.OptLogTypeEn;
+import pub.developers.forum.common.support.StringUtil;
 
 /**
  * @author Qiangqiang.Bian
@@ -28,7 +28,7 @@ public class OptLog extends BaseEntity {
         return OptLog.builder()
                 .type(OptLogTypeEn.USER_REGISTER)
                 .operatorId(operatorId)
-                .content(JSON.toJSONString(user))
+                .content(StringUtil.toJSONString(user))
                 .build();
     }
 

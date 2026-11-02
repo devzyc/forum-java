@@ -1,6 +1,7 @@
 package pub.developers.forum.app.manager;
 
 import com.alibaba.fastjson.JSON;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.api.request.user.UserBaseLoginRequest;
 import pub.developers.forum.common.enums.CacheBizTypeEn;
@@ -27,17 +28,18 @@ public class AbstractLoginManager {
     CacheService cacheService;
 
     /**
-     * 用户登录凭证 token 过期时长（单位：秒）,7天
+     * 用户登录凭证 token 的过期时长（单位：秒），即滑动窗口的窗口大小
      */
-    private static final Long USER_LOGIN_TOKEN_EXPIRE_TIMEOUT = 60 * 60 * 24 * 7L;
+    @Value("${custom-config.token.expire-seconds:86400}")
+    private Long tokenExpireSeconds;
 
     protected String login(User user, UserBaseLoginRequest baseLoginRequest) {
         // 缓存登录凭证 token =》 user
         String token = StringUtil.generateUUID();
         cacheLoginUser(token, user);
 
-        // 触发保存操作日志事件
-        EventBus.emit(EventBus.Topic.USER_LOGIN, OptLog.createUserLoginRecordLog(user.getId(), JSON.toJSONString(baseLoginRequest)));
+        // 触发保存操作日志事件（入参里带明文密码，必须走掩码序列化）
+        EventBus.emit(EventBus.Topic.USER_LOGIN, OptLog.createUserLoginRecordLog(user.getId(), StringUtil.toJSONString(baseLoginRequest)));
 
         return token;
     }
@@ -46,11 +48,11 @@ public class AbstractLoginManager {
         // 删除之前登录缓存
         deleteLoginUser(user.getId());
 
-        // 重新保存缓存
+        // 重新保存缓存：两条 key 必须成对写入、成对续期，否则 deleteLoginUser 会找不到旧 token 而残留会话
         cacheService.setAndExpire(CacheBizTypeEn.USER_LOGIN_TOKEN
-                , String.valueOf(user.getId()), token, USER_LOGIN_TOKEN_EXPIRE_TIMEOUT);
+                , String.valueOf(user.getId()), token, tokenExpireSeconds);
         cacheService.setAndExpire(CacheBizTypeEn.USER_LOGIN_TOKEN
-                , token, JSON.toJSONString(user), USER_LOGIN_TOKEN_EXPIRE_TIMEOUT);
+                , token, JSON.toJSONString(user), tokenExpireSeconds);
     }
 
     protected void deleteLoginUser(Long userId) {

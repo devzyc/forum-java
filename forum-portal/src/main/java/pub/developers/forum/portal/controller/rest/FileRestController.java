@@ -12,14 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import pub.developers.forum.api.model.ResultModel;
 import pub.developers.forum.api.request.file.FileUploadImgRequest;
 import pub.developers.forum.api.service.FileApiService;
-import pub.developers.forum.common.constant.Constant;
 import pub.developers.forum.common.enums.ErrorCodeEn;
 import pub.developers.forum.common.support.CheckUtil;
 import pub.developers.forum.common.support.StringUtil;
-import pub.developers.forum.portal.support.WebUtil;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Set;
 
 /**
@@ -39,9 +36,9 @@ public class FileRestController {
     private static final Set<String> ALLOW_TYPES = Sets.newHashSet("png", "jpeg", "jpg", "ico", "gif", "bmp", "svg");
 
     @PostMapping("/upload-wang-editor")
-    public JSONObject upload0(@RequestParam(value = "image") MultipartFile file, HttpServletRequest request) {
+    public JSONObject upload0(@RequestParam(value = "image") MultipartFile file) {
         String fileName = StringUtil.generateUUID();
-        ResultModel<String> resultModel = uploadFile(file, fileName, request);
+        ResultModel<String> resultModel = uploadFile(file, fileName);
 
         JSONArray urlArr = new JSONArray();
 
@@ -64,14 +61,12 @@ public class FileRestController {
     }
 
     @PostMapping("/upload")
-    public ResultModel<String> upload(@RequestParam(value = "image") MultipartFile file, HttpServletRequest request) {
+    public ResultModel<String> upload(@RequestParam(value = "image") MultipartFile file) {
         String fileName = StringUtil.generateUUID();
-        return uploadFile(file, fileName, request);
+        return uploadFile(file, fileName);
     }
 
-    private ResultModel<String> uploadFile(MultipartFile file, String fileName, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    private ResultModel<String> uploadFile(MultipartFile file, String fileName) {
         String fileType = file.getContentType();
         boolean isAllowType = false;
         for (String allowType : ALLOW_TYPES) {

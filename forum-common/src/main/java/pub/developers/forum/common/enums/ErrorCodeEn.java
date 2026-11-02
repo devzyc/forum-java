@@ -31,7 +31,8 @@ public enum ErrorCodeEn {
 
     USER_NOT_LOGIN(8998, "用户未登陆"),
     USER_NOT_EXIST(7996, "用户不存在"),
-    USER_REGISTER_EMAIL_IS_EXIST(7992, "注册邮箱已存在"),
+    // 原先使用 7992，与 USER_LOGIN_PWD_ERROR 重码（同为 80007992），前端无法区分"邮箱已存在"与"密码错误"，故挪至本段空闲的 7986
+    USER_REGISTER_EMAIL_IS_EXIST(7986, "注册邮箱已存在"),
     USER_LOGIN_PWD_ERROR(7992, "登录密码错误"),
     USER_OLD_PASSWORD_ERROR(7991, "旧密码错误"),
     USER_ROLE_NOT_EXIST(7990, "用户角色不存在"),

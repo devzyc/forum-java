@@ -6,6 +6,9 @@ import com.alibaba.fastjson.serializer.ValueFilter;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -82,11 +85,19 @@ public class StringUtil {
      */
     private static final Integer MAX_LENGTH_FOR_PER_PROPERTY = 100;
 
+    /**
+     * 序列化日志/审计内容时这些字段名下的值一律掩码，避免明文密码写进日志文件和 forum_opt_log 表
+     */
+    private static final Set<String> MASK_VALUE_FIELDS = new HashSet<>(Arrays.asList("password", "oldPassword", "newPassword"));
+
     public static String toJSONString(Object result) {
         return JSONObject.toJSONString(result
                 , new ValueFilter() {
                     @Override
                     public Object process(Object object, String name, Object value) {
+                        if (MASK_VALUE_FIELDS.contains(name)) {
+                            return "***";
+                        }
                         if(value instanceof String && ((String) value).length() > MAX_LENGTH_FOR_PER_PROPERTY){//String只打印前500个字符
                             return ((String) value).substring(0, MAX_LENGTH_FOR_PER_PROPERTY) + "...";
                         }

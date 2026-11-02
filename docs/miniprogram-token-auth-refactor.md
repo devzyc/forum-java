@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 文档状态 | **定稿，待实施**（本文件为后端与小程序端的单一对齐依据） |
+| 文档状态 | **后端已实施并通过本地验收**（第 7 节 1–9 项已跑通），小程序端待接入 |
 | 影响范围 | 登录态传输、会话有效期、失效信号、登出能力 |
 | 不影响范围 | token 生成算法、服务端会话存储模型、所有业务逻辑与数据库结构 |
 | 破坏性 | **有**（前端必须改为携带 `token` 请求头），但后端保留 Query 兜底，改动可一次完成 |
@@ -35,8 +35,8 @@
 | 失效信号 | HTTP 200 + `code:80008998` 或 `80007988`（两个魔数，前端要都认） | **HTTP 401**（body 结构保留 `code` 作二级判据） |
 | 权限不足 | 与"未登录"混在同一处理路径 | **HTTP 403**，与"未登录"严格分离 |
 | 取值入口 | Cookie → Header → Query 三级兜底 | Header → Query 两级（**删除 Cookie 分支**） |
-| Controller 样板 | 每方法手写 `request.setAttribute("token", cookieGetSid(request))`，全项目 **20 处** | 全部删除，由拦截器统一注入一次 |
-| 登出 | **接口不存在**（`cookieDelSid` 定义了但从未被调用） | 新增 `POST /user-rest/logout` |
+| Controller 样板 | 每方法手写 `request.setAttribute("token", cookieGetSid(request))`，全项目 19 处（另 1 处在拦截器里） | 全部删除，由拦截器统一注入一次 |
+| 登出 | 服务层 `UserManager.logout()` 早已存在，但**没有 REST 入口**（`cookieDelSid` 定义了却从未被调用） | 新增 `POST /user-rest/logout` |
 | 页面时代遗产 | `GetMappingAspect`、`ViewException`、`postHandle` 里塞 Thymeleaf 变量 | 删除（见第 5 节，其中一个是真实风险） |
 
 ---
@@ -106,8 +106,10 @@ Header: token: <本地 storage 的值>
   "createAt":"2026-01-01 10:00:00","lastLoginTime":"2026-11-01 09:00:00"}}
 
 失效 → HTTP 401
-{"code":80007988,"message":"token 无效","success":false,"data":null}
+{"code":80008998,"message":"用户未登陆","success":false,"data":null}
 ```
+
+实现说明：`current` 不再把 token 当入参传给 `info(token)`，而是改走 `UserApiService.current()` → `UserManager.current()`（标了 `@IsLogin`），从登录上下文取用户。好处有二：不带 token、带过期 token、带乱填 token 三种情况**统一收敛到 `80008998`**（前端只认一个码），且省掉每请求一次重复的缓存查用户 + JSON 反序列化。
 
 策略：`App.onShow` 调一次，成功则把 `data`（含 `id`）存入全局 store。
 
@@ -178,13 +180,13 @@ formData: { file: <图片> }
 | 5 | `forum-facade/.../aspect/ExceptionHandlerAndLogAspect.java` | `80008998` / `80007988` 日志降级，避免刷爆 `/opt/logs/forum-java` | 加固 |
 | 6 | `forum-facade/.../aspect/LoginUserAspect.java` | 缓存命中后调 `cacheService.renew(...)` 做滑动续期 | 核心 |
 | 7 | `forum-app/.../manager/AbstractLoginManager.java` | TTL 从硬编码常量改为 `@Value` 注入；续期保持两条 key 成对操作 | 核心 |
-| 8 | `forum-domain/.../service/CacheService.java` + `forum-infrastructure/.../cache/DbCacheServiceImpl.java` | 新增 `renew(bizType, key, seconds)`，阈值判断与"不复活已过期"逻辑全部内置于 impl | 核心 |
-| 9 | `forum-portal/.../controller/rest/UserRestController.java` | 删除本类 8 行样板；删除 2 处 `cookieAddSid` 调用；**新增 `/logout`** | 核心 + 清理 |
-| 10 | 其余 7 个 `*RestController` | 删除 `request.setAttribute(...)` 样板（合计约 12 行） | 清理 |
+| 8 | `forum-domain/.../service/CacheService.java` + `forum-infrastructure/.../cache/DbCacheServiceImpl.java` | 新增 `renew(bizType, key)`（时长不再由调用方传，改为 `StringValue` 新增 `seconds` 字段自描述）；阈值判断与"不复活已过期"逻辑全部内置于 impl | 核心 |
+| 9 | `forum-portal/.../controller/rest/UserRestController.java` | 删除本类 8 行样板；删除 2 处 `cookieAddSid` 调用；**新增 `/logout`**；`/current` 改走 `UserApiService.current()`（连带新增 `UserApiService`/`UserApiServiceImpl`/`UserManager.current()` 三处） | 核心 + 清理 |
+| 10 | 其余 6 个 `*RestController` | 删除 `request.setAttribute(...)` 样板（合计 11 行）及随之失效的 `HttpServletRequest` 形参与 import | 清理 |
 | 11 | `forum-portal/.../support/CorsInterceptor.java` | 删除注释掉的 `Allow-Credentials` 行；`Allow-Headers: Content-Type,token` 已就绪，不动 | 清理 |
-| 12 | `forum-portal/.../support/GetMappingAspect.java` + `ViewException.java` | 整体删除（页面时代遗产，见 5.2） | 清理 |
-| 13 | `forum-starter/src/main/resources/application.properties` | 新增 `custom-config.token.expire-seconds=86400`、`custom-config.token.renew-threshold-ratio=0.5` | 配置 |
-| 14 | `forum-common/.../enums/ErrorCodeEn.java` | `USER_REGISTER_EMAIL_IS_EXIST` 从 `7992` 挪至 `7990`（消除与 `USER_LOGIN_PWD_ERROR` 的重码） | 修正 |
+| 12 | `forum-portal/.../support/GetMappingAspect.java` + `ViewException.java` + `ResponseBodyAspect.java` | 三个整体删除（页面时代遗产，见 5.2 / 5.3） | 清理 |
+| 13 | `forum-starter/src/main/resources/application.properties` | 新增 `custom-config.token.expire-seconds=86400`、`custom-config.cache.renew-threshold-ratio=0.5`（两处 `@Value` 都带默认值，老配置文件不改也能起） | 配置 |
+| 14 | `forum-common/.../enums/ErrorCodeEn.java` | `USER_REGISTER_EMAIL_IS_EXIST` 从 `7992` 挪至 `7986`（消除与 `USER_LOGIN_PWD_ERROR` 的重码；`7990` 已被 `USER_ROLE_NOT_EXIST` 占用，故取用户段首个空闲码） | 修正 |
 
 ### 4.1 滑动窗口设计（"天天用就一直不过期"）
 
@@ -194,7 +196,7 @@ formData: { file: <图片> }
 
 ```properties
 custom-config.token.expire-seconds=86400
-custom-config.token.renew-threshold-ratio=0.5
+custom-config.cache.renew-threshold-ratio=0.5
 ```
 
 三条实现铁律：
@@ -277,33 +279,117 @@ Controller: 帖子详情正常返回 200 数据
 
 ## 7. 验收清单
 
-后端（Postman，配好 Collection 级 Pre-request Script 后）：
+后端（本地已用 curl 跑完，服务以 `--custom-config.token.expire-seconds=60 --custom-config.cache.renew-threshold-ratio=0.5` 启动做短窗口验证，**靠命令行参数覆盖，没改任何代码开关**）：
 
-1. `login` → 200，`data` 为 32 位 UUID；**响应头中不再有 `Set-Cookie`**
-2. 带 `token` 头调 `current` → 200 + `id`
-3. **删除** `token` 头调 `current` → **401** + `code:80007988`，且 body 仍是 `ResultModel` 结构（不是 `/error` 形状）
-4. 带乱填的 token 调 `/article-rest/{id}`（游客接口）→ **仍返回 200 正常数据，绝不 401** ← 5.1 的回归测试
-5. 有 `@IsLogin` 的接口：未登录 → 401；普通用户调 admin 接口 → **403 而非 401**
-6. `logout` → 200，随后用原 token 调 `current` → 401
-7. **滑动续期验证**：临时设 `expire-seconds=60`、`renew-threshold-ratio=0.5`；登录后每 40 秒调一次接口 → 持续 200 不失效；停止 70 秒 → 401。验完改回 `86400`
-8. `forum_cache` 表中 `USER_LOGIN_TOKEN` 行数不随时间单调增长 ← 4.1 铁律 1 的验证
-9. 触发一批 401 请求后，`/opt/logs/forum-java` 无失败日志刷屏
+| # | 项 | 结果 |
+|---|---|---|
+| 1 | `login` → 200，`data` 为 32 位 UUID；**响应头无 `Set-Cookie`** | ✅ |
+| 2 | 带 `token` 头调 `current` → 200 + `id` | ✅ |
+| 3 | 删 `token` 头 / 乱填 token 调 `current` → **401** + `{code:80008998}`，body 仍是 `ResultModel`（不是 `/error` 形状） | ✅ |
+| 4 | **乱填 token 调游客接口 `/article-rest/{id}` → 仍 200 正常数据，未被污染成 401** ← 5.1 回归 | ✅ |
+| 5 | `@IsLogin` 接口未登录 → 401 | ✅（`/user-rest/follow/1`） |
+| 6 | 普通用户调 admin 接口 → 403 | ⚪ 未验证：瘦身删掉页面控制器后，**当前没有可达的 admin REST 入口**，403 映射作为能力保留 |
+| 7 | `logout` → 200，随后原 token 调 `current` → 401；无 token 调 `logout` → 幂等 200 | ✅ |
+| 8 | 重复邮箱注册 → `80007986`（与登录密码错误的 `80007992` 不再同码） | ✅ |
+| 9 | Query 参数 `?token=` 通道可用 | ✅ |
+| 10 | **滑动续期**：每 40 秒调一次，`current` 持续 200；`forum_cache` 里该行 `expire` 依次为 …507 / …547 / …587（每次 +40s，确实在滚动）；停止 80 秒 → 401，条目被 5 秒清扫任务删干净 | ✅ |
+| 11 | `forum_cache` 中 `USER_LOGIN_TOKEN` 行数不单调增长（登出后只剩改造前已存在的 uid=5 会话 2 行，无测试残留） | ✅ |
+| 12 | 一批 401 后日志不刷屏：会话失效只打一行 `session invalid. api=…#info. code=80007988. cost=0ms`，不再转储完整参数与结果 | ✅ |
+| 13 | 被丢弃的注册 token 调 `current` → 401（单会话下 `deleteLoginUser` 已把它连带清掉，无幽灵会话） | ✅ |
 
-小程序：
+小程序（待前端接入）：
 
-10. 登录成功 → storage 有 token → 首页列表正常
-11. **完全杀掉小程序后重新进入 → 直接是登录态** ← 本次改造的核心指标，Cookie 方案做不到
-12. 手工把 storage 中 token 改成乱码 → 一进 App 就被引导回登录页（`onShow` 探活生效）
-13. 首页并发 5 个请求全部 401 → **只跳一次登录页、只弹一次 toast**（并发锁生效）
-14. 头像上传成功且返回值可正常解析（`JSON.parse(res.data)`）
-15. 注册成功 → 不写入 storage → 强制登录后才可用；用被丢弃的那个 token 调 `current` 应返回 401
+14. 登录成功 → storage 有 token → 首页列表正常
+15. **完全杀掉小程序后重新进入 → 直接是登录态** ← 本次改造的核心指标，Cookie 方案做不到
+16. 手工把 storage 中 token 改成乱码 → 一进 App 就被引导回登录页（`onShow` 探活生效）
+17. 首页并发 5 个请求全部 401 → **只跳一次登录页、只弹一次 toast**（并发锁生效）
+18. 头像上传成功且返回值可正常解析（`JSON.parse(res.data)`）
 
 ---
 
-## 8. 实施顺序建议
+## 8. 实施顺序（已全部完成）
 
-1. **第 1 步（地基）**：`WebUtil.resolveToken` + `GlobalViewInterceptor` 统一注入 + 清理搬到 `afterCompletion` + 删除 20 处样板 + 删除 `GetMappingAspect`/`ViewException`。此时 Cookie 通道仍可用，可先回归一轮。
-2. **第 2 步（会话语义）**：`CacheService.renew` + `DbCacheServiceImpl` 实现 + `LoginUserAspect` 续期 + `AbstractLoginManager` TTL 配置化 + 两个配置项。
-3. **第 3 步（失效信号）**：`TokenResultStatusAdvice`（401/403）+ 切面日志降级 + `ErrorCodeEn` 重码修正。
-4. **第 4 步（收尾）**：切断 Cookie 下发与读取、新增 `/logout`、`CorsInterceptor` 清理。
-5. 每步完成后跑第 7 节对应项，全部通过再进下一步；全部改动保持 Git 工作区未提交状态直至验收通过。
+1. **第 1 步（地基）**✅：`WebUtil.resolveToken` + `GlobalViewInterceptor` 统一注入 + 清理搬到 `afterCompletion` + 删除 19 处 Controller 样板 + 删除 `GetMappingAspect`/`ViewException`/`ResponseBodyAspect`。
+2. **第 2 步（会话语义）**✅：`CacheService.renew` + `DbCacheServiceImpl` 实现 + `LoginUserAspect` 两条 key 成对续期 + `AbstractLoginManager` TTL 配置化 + 两个配置项。
+3. **第 3 步（失效信号）**✅：`TokenResultStatusAdvice`（401/403）+ 切面日志降级 + `ErrorCodeEn` 重码修正。
+4. **第 4 步（收尾）**✅：切断 Cookie 下发与读取、新增 `/logout`、`/current` 改走登录上下文、`CorsInterceptor` 清理。
+5. 验证：`mvn -DskipTests package` 通过 → 本地起 jar 跑完第 7 节 1–13 项 → 测试用户与 `forum_opt_log` 残留已清库。
+
+---
+
+## 9. Postman 联调脚本（只配一次）
+
+Cookie jar 已随本次改造失效（后端不再下发 `Set-Cookie`），Postman 改用 Collection 级脚本，**对集合内所有请求（含子文件夹与以后新增的）自动生效，不用逐个配**。
+
+把下面这段贴到 **Collection → Pre-request Script**（不是某个 Request 的）：
+
+```javascript
+// 除登录/注册本身以外，所有请求自动带上 token
+const url = pm.request.url.toString();
+if (!/\/user-rest\/(login|register)$/.test(url)) {
+    const token = pm.collectionVariables.get('token');
+    if (token) {
+        pm.request.headers.upsert({ key: 'token', value: token });
+    }
+}
+```
+
+再在同一路径的 **Tests** 里加一段（登录成功自动存，会话失效自动重登并重跑一次）：
+
+```javascript
+const body = pm.response.json();
+
+if (pm.request.url.toString().includes('/user-rest/login') && body.success) {
+    pm.collectionVariables.set('token', body.data);
+}
+
+// 401：集合里存的 token 已失效，自动重登一次并重跑当前请求
+if (pm.response.code === 401 && !pm.request._retriedForExpiredToken) {
+    pm.request._retriedForExpiredToken = true;
+    pm.sendRequest({
+        url: pm.variables.replaceIn('{{baseUrl}}/user-rest/login'),
+        method: 'POST',
+        header: { 'Content-Type': 'application/json' },
+        body: { mode: 'raw', raw: '{"email":"' + pm.collectionVariables.get('email') + '","password":"' + pm.collectionVariables.get('password') + '"}' }
+    }, (err, res) => {
+        if (!err) {
+            pm.collectionVariables.set('token', res.json().data);
+            pm.sendRequest(pm.request, (e, r) => {
+                if (!e) { pm.test('重登后重跑成功', () => pm.expect(r.code).to.be.oneOf([200, 401])); }
+            });
+        }
+    });
+}
+```
+
+集合变量配 `baseUrl` / `email` / `password` 三个值即可。**日常 30+ 个请求一个都不用手动填 token，token 变了也不用管** —— 过期了就发请求，脚本自己重登。
+
+---
+
+## 10. 附加修复与已知决策
+
+### 10.1 明文密码写日志 + 写库（已修复，2026-11-01）
+
+现象：`ExceptionHandlerAndLogAspect` 把 API 入参整体序列化落 stdout（含注册/登录/改密的**明文密码**）；`AbstractLoginManager.login()` 又把 `JSON.toJSONString(baseLoginRequest)` 存进 `forum_opt_log.content`（登录/注册审计行里也是明文）。
+
+修复方式（序列化出口统一掩码，请求类保持零依赖不动）：
+
+| 出口 | 位置 | 处理 |
+|---|---|---|
+| stdout 接口日志 | `StringUtil.toJSONString` 的 ValueFilter | 字段名命中 `password`/`oldPassword`/`newPassword` 一律输出 `***`（该工具仅用于日志序列化，全项目 4 个调用点都在切面里） |
+| `forum_opt_log` 登录/注册审计 | `AbstractLoginManager.login()` | `JSON.toJSONString` → `StringUtil.toJSONString` |
+| `forum_opt_log` 注册记录 | `OptLog.createUserRegisterRecordLog()` | 同上（此处本是加盐 MD5，顺手一并掩码） |
+| 登录缓存 JSON | `AbstractLoginManager.cacheLoginUser()` | **保持原样、绝不能掩码**：`updatePwd` 校验旧密码依赖反序列化出的 `user.password` |
+
+实测验收（本地起服务）：注册/登录/改密全链路后，stdout 中密码金丝串 0 命中，切面 params 与 `forum_opt_log` 三行 content 均为 `"password":"***"`；改密后新密码登录 200、`/user-rest/current` 200、旧密码登录 80007992，功能无回归。
+
+### 10.2 上传接口先传文件、后校登录（决策：不修）
+
+`/user-rest/update-headimg`、`/file-rest/upload` 在 controller 层就把图传给七牛，`@IsLogin` 要到 `FileManager`/`UserManager` 才生效，未登录者可直连接口往云存储写文件。
+
+**拍板结论**：一般用户经小程序前端天然拦截（未登录无入口）；懂技术直连接口滥用属可接受风险，论坛体量下损伤有限，不做后端改造。若后续七牛账单异常再回来收敛。
+
+### 10.3 老会话缓存行无 `seconds` 字段（预期行为，无需处理）
+
+改造前写入的 `forum_cache` 行反序列化后 `seconds == null` → `renew` 直接 no-op，行为上是"旧 7 天绝对过期不变"；用户下次登录就自然升级成滑动窗口。
+

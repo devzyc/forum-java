@@ -3,6 +3,7 @@ package pub.developers.forum.infrastructure.cache;
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -51,6 +52,12 @@ public class DbCacheServiceImpl implements CacheService {
      * 删除缓存
      */
     private static final Set<String> DELETE_KEYS = new HashSet<>();
+
+    /**
+     * 续期阈值：剩余时长不足原时长的这个比例时才真正续期并置脏
+     */
+    @Value("${custom-config.cache.renew-threshold-ratio:0.5}")
+    private Double renewThresholdRatio;
 
     @Override
     public boolean set(CacheBizTypeEn bizType, String key, String value) {
@@ -107,6 +114,33 @@ public class DbCacheServiceImpl implements CacheService {
 
         ALL_CACHE.remove(buildKey);
         DELETE_KEYS.add(buildKey);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public boolean renew(CacheBizTypeEn bizType, String key) {
+        checkKey(key);
+
+        String buildKey = buildKey(bizType, key);
+        StringValue stringValue = ALL_CACHE.get(buildKey);
+        // 条目不存在，或以 set() 存入的永不过期条目（无 seconds），都不续期
+        if (null == stringValue || null == stringValue.getSeconds()) {
+            return Boolean.FALSE;
+        }
+
+        long now = System.currentTimeMillis();
+        long totalMillis = stringValue.getSeconds() * 1000L;
+        // 已过期只是还没被定时任务扫掉，此时绝不复活，否则会制造"逻辑上已死、库里又清不掉"的幽灵会话
+        if (now >= stringValue.getExpire()) {
+            return Boolean.FALSE;
+        }
+        // 剩余时长还很充裕，不置脏，避免每个请求都刷一次 forum_cache 表
+        if (stringValue.getExpire() - now > (long) (totalMillis * renewThresholdRatio)) {
+            return Boolean.FALSE;
+        }
+
+        stringValue.setExpire(now + totalMillis);
+        MODIFY_KEYS.add(buildKey);
         return Boolean.TRUE;
     }
 
@@ -197,10 +231,15 @@ public class DbCacheServiceImpl implements CacheService {
         private String value;
         private Long expire;
         private String type;
+        /**
+         * 存入时的原始过期时长（单位：秒），供滑动续期算出新的过期时间；为 null 表示永不过期
+         */
+        private Long seconds;
 
         private StringValue(String type, String value, Long seconds) {
             this.type = type;
             this.value = value;
+            this.seconds = seconds;
             this.expire = System.currentTimeMillis() + seconds * 1000;
         }
 

@@ -93,6 +93,11 @@ public class UserApiServiceImpl implements UserApiService {
     }
 
     @Override
+    public ResultModel<UserInfoResponse> current() {
+        return ResultModelUtil.success(userManager.current());
+    }
+
+    @Override
     public ResultModel<String> register(UserRegisterRequest request) {
         UserValidator.register(request);
 

@@ -7,11 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 import pub.developers.forum.api.model.ResultModel;
 import pub.developers.forum.api.request.comment.CommentCreateRequest;
 import pub.developers.forum.api.service.CommentApiService;
-import pub.developers.forum.common.constant.Constant;
-import pub.developers.forum.portal.support.WebUtil;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Qiangqiang.Bian
@@ -26,9 +23,7 @@ public class CommentRestController {
     private CommentApiService commentApiService;
 
     @PostMapping("/create")
-    public ResultModel create(@RequestBody CommentCreateRequest createRequest, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel create(@RequestBody CommentCreateRequest createRequest) {
         return commentApiService.create(createRequest);
     }
 

@@ -34,6 +34,11 @@ public interface UserApiService {
 
     ResultModel<UserInfoResponse> info(Long uid);
 
+    /**
+     * 当前登录用户详情（从登录上下文取，不依赖入参 token）
+     */
+    ResultModel<UserInfoResponse> current();
+
     ResultModel<String> register(UserRegisterRequest request);
 
     ResultModel<String> emailLogin(UserEmailLoginRequest request);

@@ -13,7 +13,5 @@ public interface WebConst {
     String DOMAIN_ARTICLE = "article";
     String DOMAIN_INTEREST = "interest";
 
-    String COOKIE_SID_KEY = "sid";
-
     String REQUEST_REDIRECT_PREFIX = "redirect:";
 }

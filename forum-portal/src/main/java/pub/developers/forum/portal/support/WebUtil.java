@@ -4,9 +4,7 @@ import org.springframework.util.ObjectUtils;
 import pub.developers.forum.api.model.ResultModel;
 import pub.developers.forum.common.constant.Constant;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author Qiangqiang.Bian
@@ -15,40 +13,27 @@ import javax.servlet.http.HttpServletResponse;
  **/
 public class WebUtil {
 
-    public static String cookieGetSid(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (!ObjectUtils.isEmpty(cookies)) {
-            for (Cookie cookie : cookies) {
-                if (WebConst.COOKIE_SID_KEY.equals(cookie.getName()) && !ObjectUtils.isEmpty(cookie.getValue())) {
-                    return cookie.getValue();
-                }
-            }
+    /**
+     * 取登录凭证 token
+     * <p>
+     * 只读请求头，请求头取不到时降级读 URL 参数（给无法自定义请求头的场景留口子，如图片直链）。
+     * 不再读 Cookie：小程序读不到 Set-Cookie，也无法手写 Cookie 头，会话持久化统一由客户端 storage 存 token 完成。
+     *
+     * @param request
+     * @return 没有登录凭证时返回 null
+     */
+    public static String resolveToken(HttpServletRequest request) {
+        String token = request.getHeader(Constant.REQUEST_HEADER_TOKEN_KEY);
+        if (!ObjectUtils.isEmpty(token)) {
+            return token;
         }
 
-        String headerSid = request.getHeader(Constant.REQUEST_HEADER_TOKEN_KEY);
-        if (!ObjectUtils.isEmpty(headerSid)) {
-            return headerSid;
-        }
-
-        String querySid = request.getParameter(Constant.REQUEST_QUERY_TOKEN_KEY);
-        if (!ObjectUtils.isEmpty(querySid)) {
-            return querySid;
+        String queryToken = request.getParameter(Constant.REQUEST_QUERY_TOKEN_KEY);
+        if (!ObjectUtils.isEmpty(queryToken)) {
+            return queryToken;
         }
 
         return null;
-    }
-
-    public static void cookieAddSid(HttpServletResponse response, String sid) {
-        Cookie cookie = new Cookie(WebConst.COOKIE_SID_KEY, sid);
-        cookie.setPath("/");
-        response.addCookie(cookie);
-    }
-
-    public static void cookieDelSid(HttpServletResponse response) {
-        Cookie cookie = new Cookie(WebConst.COOKIE_SID_KEY, null);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
     }
 
     public static String requestIp(HttpServletRequest request) {

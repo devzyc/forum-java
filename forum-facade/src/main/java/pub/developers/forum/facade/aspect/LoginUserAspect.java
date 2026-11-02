@@ -50,8 +50,16 @@ public class LoginUserAspect {
             return pjp.proceed();
         }
 
+        User user = JSON.parseObject(cacheString, User.class);
         LoginUserContext.setToken(token);
-        LoginUserContext.setUser(JSON.parseObject(cacheString, User.class));
+        LoginUserContext.setUser(user);
+
+        // 滑动窗口续期：会话在距最后一次成功使用满一个窗口时长后才失效。
+        // token=>user 与 uid=>token 两条 key 必须成对续，只续一条会让 deleteLoginUser 找不到旧 token，会话只增不减
+        cacheService.renew(CacheBizTypeEn.USER_LOGIN_TOKEN, token);
+        if (!ObjectUtils.isEmpty(user.getId())) {
+            cacheService.renew(CacheBizTypeEn.USER_LOGIN_TOKEN, String.valueOf(user.getId()));
+        }
 
         try {
             return pjp.proceed();

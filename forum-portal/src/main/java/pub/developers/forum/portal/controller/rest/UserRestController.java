@@ -16,16 +16,13 @@ import pub.developers.forum.api.response.user.UserPageResponse;
 import pub.developers.forum.api.service.ArticleApiService;
 import pub.developers.forum.api.service.FileApiService;
 import pub.developers.forum.api.service.UserApiService;
-import pub.developers.forum.common.constant.Constant;
 import pub.developers.forum.common.enums.ErrorCodeEn;
 import pub.developers.forum.common.support.CheckUtil;
 import pub.developers.forum.portal.support.WebUtil;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -51,50 +48,54 @@ public class UserRestController {
     private static final Set<String> ALLOW_TYPES = Sets.newHashSet("png", "jpeg", "jpg", "ico", "gif", "bmp", "svg");
 
     @PostMapping("/register")
-    public ResultModel<String> register(@RequestBody UserRegisterRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
+    public ResultModel<String> register(@RequestBody UserRegisterRequest request, HttpServletRequest servletRequest) {
         request.setIp(WebUtil.requestIp(servletRequest));
         request.setUa(WebUtil.requestUa(servletRequest));
-        ResultModel<String> resultModel = userApiService.register(request);
 
-        WebUtil.cookieAddSid(response, resultModel.getData());
-
-        return resultModel;
+        return userApiService.register(request);
     }
 
     @PostMapping("/login")
-    public ResultModel<String> login(@RequestBody UserEmailLoginRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
+    public ResultModel<String> login(@RequestBody UserEmailLoginRequest request, HttpServletRequest servletRequest) {
         request.setIp(WebUtil.requestIp(servletRequest));
         request.setUa(WebUtil.requestUa(servletRequest));
-        ResultModel<String> resultModel =  userApiService.emailLogin(request);
 
-        WebUtil.cookieAddSid(response, resultModel.getData());
+        return userApiService.emailLogin(request);
+    }
 
-        return resultModel;
+    /**
+     * 退出登录
+     * <p>
+     * 服务端删除 token=>user 与 uid=>token 两条缓存，客户端自行清掉本地 storage。
+     */
+    @PostMapping("/logout")
+    public ResultModel logout(HttpServletRequest request) {
+        String token = WebUtil.resolveToken(request);
+        if (ObjectUtils.isEmpty(token)) {
+            // 已经没有登录凭证，登出按幂等处理，免得前端为"清本地"还要分情况判断
+            return WebUtil.success(null);
+        }
+
+        UserTokenLogoutRequest logoutRequest = new UserTokenLogoutRequest();
+        logoutRequest.setToken(token);
+
+        return userApiService.logout(logoutRequest);
     }
 
     @PostMapping("/update-info")
-    public ResultModel updateInfo(@RequestBody UserUpdateInfoRequest updateInfoRequest, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel updateInfo(@RequestBody UserUpdateInfoRequest updateInfoRequest) {
         return userApiService.updateInfo(updateInfoRequest);
     }
 
     @PostMapping("/update-headimg")
-    public ResultModel ResultModelupdateHeadImg(MultipartFile file, HttpServletRequest request)throws IOException {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-        //获取文件的内容
-        InputStream is = file.getInputStream();
+    public ResultModel ResultModelupdateHeadImg(MultipartFile file) throws IOException {
         //获取原始文件名
         String originalFilename = file.getOriginalFilename();
-        ResultModel<String> linkFilename =  updateHeadimg(file,originalFilename,request);
+        ResultModel<String> linkFilename = updateHeadimg(file, originalFilename);
         return userApiService.updateHeadImg(linkFilename.getData());
     }
 
-
-
-    private ResultModel<String> updateHeadimg(MultipartFile file, String originalFilename, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    private ResultModel<String> updateHeadimg(MultipartFile file, String originalFilename) {
         String fileType = file.getContentType();
         boolean isAllowType = false;
         for (String allowType : ALLOW_TYPES) {
@@ -119,35 +120,28 @@ public class UserRestController {
     }
 
     @PostMapping("/update-pwd")
-    public ResultModel updatePwd(@RequestBody UserUpdatePwdRequest updatePwdRequest, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel updatePwd(@RequestBody UserUpdatePwdRequest updatePwdRequest) {
         return userApiService.updatePwd(updatePwdRequest);
     }
 
     @PostMapping("/follow/{followed}")
-    public ResultModel follow(@PathVariable("followed") Long followed, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel follow(@PathVariable("followed") Long followed) {
         return userApiService.follow(followed);
     }
 
     @PostMapping("/cancel-follow/{followed}")
-    public ResultModel cancelFollow(@PathVariable("followed") Long followed, HttpServletRequest request) {
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+    public ResultModel cancelFollow(@PathVariable("followed") Long followed) {
         return userApiService.cancelFollow(followed);
     }
 
     /**
-     * 获取当前登录用户信息（登录成功后小程序用 sid cookie 换取自己的 uid）
+     * 获取当前登录用户信息，小程序用作会话探活接口
+     * <p>
+     * 未登录 / token 已过期都会因 USER_NOT_LOGIN 返回 401，前端据此跳登录页
      */
     @GetMapping("/current")
-    public ResultModel<UserInfoResponse> current(HttpServletRequest request) {
-        String sid = WebUtil.cookieGetSid(request);
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, sid);
-
-        return userApiService.info(sid);
+    public ResultModel<UserInfoResponse> current() {
+        return userApiService.current();
     }
 
     /**
@@ -160,11 +154,7 @@ public class UserRestController {
     public ResultModel<?> getUserArticles(
             @PathVariable("uid") Long uid,
             @RequestParam(required = false) Integer pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            HttpServletRequest request) {
-
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+            @RequestParam(required = false) Integer pageSize) {
         PageRequestModel<ArticleAuthorPageRequest> pageRequestModel = new PageRequestModel<>();
         pageRequestModel.setPageNo(ObjectUtils.isEmpty(pageNo) ? 1 : pageNo);
         pageRequestModel.setPageSize(ObjectUtils.isEmpty(pageSize) ? 9999 : pageSize);
@@ -195,11 +185,7 @@ public class UserRestController {
     public ResultModel<?> getFollowers(
             @PathVariable("uid") Long uid,
             @RequestParam(required = false) Integer pageNo,
-            @RequestParam(required = false) Integer pageSize,
-            HttpServletRequest request) {
-
-        request.setAttribute(Constant.REQUEST_HEADER_TOKEN_KEY, WebUtil.cookieGetSid(request));
-
+            @RequestParam(required = false) Integer pageSize) {
         PageRequestModel<Long> pageRequestModel = new PageRequestModel<>();
         pageRequestModel.setPageNo(ObjectUtils.isEmpty(pageNo) ? 1 : pageNo);
         pageRequestModel.setPageSize(ObjectUtils.isEmpty(pageSize) ? 9999 : pageSize);

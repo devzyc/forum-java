@@ -17,9 +17,9 @@ public class CorsInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse response, Object o) throws Exception {
         response.setHeader("Access-Control-Allow-Origin", "*");
-//        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setHeader("Access-Control-Max-Age", "302400");
         response.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+        // 登录凭证走名为 token 的请求头，必须在允许列表里
         response.setHeader("Access-Control-Allow-Headers", "Content-Type,token");
         return true;
     }
