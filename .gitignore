@@ -67,4 +67,8 @@ buildNumber.properties
 node_modules/
 vue-admin.html
 
+# 本地启动脚本与其生成的日志覆盖配置（仅本机使用，不进仓库）
+local-run.sh
+/forum-local/
+
 /.java-version
