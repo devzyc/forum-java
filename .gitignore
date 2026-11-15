@@ -71,4 +71,12 @@ vue-admin.html
 local-run.sh
 /forum-local/
 
+# API 测试脚本（含敏感账号信息，建议 ignore）
+test_forum_api.sh
+update_tags.sql
+
+# 生产环境部署配置（包含密码和密钥路径，必须 ignore）
+scripts/deploy/.env.production
+scripts/data-migration/exported-data/
+
 /.java-version
