@@ -46,7 +46,7 @@ mysql -u root -p'Abc@1234' forum-java < scripts/sql/migration/2026-11-15-tag-sys
 ssh -i ~/.ssh/ssh_key_1.pem root@43.136.176.163 "systemctl status forum-java"
 
 # 测试 API
-curl http://43.136.176.163:8080/tag-rest/all | jq '.data | length'
+curl http://43.136.176.163:8080/tag/all | jq '.data | length'
 # 预期输出：12
 
 # 运行冒烟测试
@@ -145,7 +145,7 @@ scp -r -i ~/.ssh/ssh_key_1.pem root@43.136.176.163:/var/log/forum logs-backup/
 │       └─ deny/inactive → 开放端口：ufw allow 8080/tcp
 │
 └─ Step 4: 测试 API
-    └─ curl http://localhost:8080/tag-rest/all
+    └─ curl http://127.0.0.1:8080/tag/all
         ├─ HTTP 200 + JSON → 功能正常
         └─ Connection refused → 回到 Step 1
 ```

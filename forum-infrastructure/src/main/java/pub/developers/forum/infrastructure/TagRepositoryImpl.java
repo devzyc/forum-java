@@ -165,4 +165,9 @@ public class TagRepositoryImpl extends AbstractPostsRepository implements TagRep
 
         return PageResult.build(pageInfo.getTotal(), pageInfo.getSize(), TagTransfer.toTags(tagDOList));
     }
+
+    @Override
+    public void delete(Long id) {
+        tagDAO.softDelete(id);
+    }
 }

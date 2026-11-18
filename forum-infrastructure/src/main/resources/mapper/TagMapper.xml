@@ -116,4 +116,10 @@
         where id = #{id}
     </select>
 
+    <update id="softDelete">
+        UPDATE <include refid="table_name"/>
+        SET is_delete = 1, update_at = NOW()
+        WHERE id = #{id}
+    </update>
+
 </mapper>

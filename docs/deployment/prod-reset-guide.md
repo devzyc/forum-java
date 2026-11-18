@@ -107,7 +107,7 @@ systemctl status forum-java
 journalctl -u forum-java -n 50 --since "5 minutes ago"
 
 # 验证服务是否正常运行
-curl -s http://localhost:8080/tag-rest/all | jq '.data | length'
+curl -s http://127.0.0.1:8080/tag/all | jq '.data | length'
 # 预期输出：12
 ```
 

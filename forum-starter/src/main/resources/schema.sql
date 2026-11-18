@@ -151,9 +151,9 @@ DROP TABLE IF EXISTS `forum_tag`;
 CREATE TABLE `forum_tag` (
   `id` bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `audit_state` varchar(64) NOT NULL COMMENT '审核状态',
-  `group_name` varchar(255) CHARACTER SET utf8mb4 NOT NULL COMMENT '所属分组',
+  `group_name` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL COMMENT '所属分组',
   `name` varchar(64) NOT NULL COMMENT '名称',
-  `description` varchar(1024) NOT NULL COMMENT '描述',
+  `description` varchar(1024) DEFAULT NULL COMMENT '描述',
   `ref_count` bigint(11) NOT NULL DEFAULT '0' COMMENT '引用统计',
   `creator_id` bigint(11) NOT NULL COMMENT '创建人',
   `is_delete` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '删除标识（0:未删除、1:已删除）',

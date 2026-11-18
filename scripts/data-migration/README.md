@@ -207,15 +207,15 @@ JOIN forum_user u ON p.author_id = u.id LIMIT 5;
 
 ```bash
 # 登录接口
-curl -X POST http://localhost:8080/user-rest/login \
+curl -X POST http://127.0.0.1:8080/user-rest/login \
   -H "Content-Type: application/json" \
   -d '{"loginId":"test@example.com","password":"TestPass123"}'
 
 # 查询文章列表
-curl -X GET "http://localhost:8080/article-rest/list?pageNo=1&pageSize=10"
+curl -X GET "http://127.0.0.1:8080/article-rest/list?pageNo=1&pageSize=10"
 
 # 查看某个用户的头像 URL（替换为你的实际 token）
-curl -X GET http://localhost:8080/user-rest/current \
+curl -X GET http://127.0.0.1:8080/user-rest/current \
   -H "token: YOUR_TOKEN_HERE" | jq '.data.avatar'
 ```
 

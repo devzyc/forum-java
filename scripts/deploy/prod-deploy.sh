@@ -169,10 +169,10 @@ if [[ "$SERVICE_STATUS" != "active" ]]; then
 fi
 
 # 测试 API 是否可用
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${PROD_SERVER_IP}:${APP_PORT}/tag-rest/all)
+RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${PROD_SERVER_IP}:${APP_PORT}/tag/all)
 
 if [[ "$RESPONSE" == "200" ]]; then
-    TAG_COUNT=$(curl -s http://${PROD_SERVER_IP}:${APP_PORT}/tag-rest/all | jq '.data | length')
+    TAG_COUNT=$(curl -s http://${PROD_SERVER_IP}:${APP_PORT}/tag/all | jq '.data | length')
     echo "✅ API 正常响应，标签数量：${TAG_COUNT}"
     
     if [[ "$TAG_COUNT" == "12" ]]; then

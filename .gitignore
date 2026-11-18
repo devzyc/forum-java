@@ -79,4 +79,8 @@ update_tags.sql
 scripts/deploy/.env.production
 scripts/data-migration/exported-data/
 
+# 本地测试脚本缓存（token 文件不提交，按账号隔离命名 forum_token_*.txt）
+/tmp/forum_token.txt
+/tmp/forum_token_*.txt
+
 /.java-version

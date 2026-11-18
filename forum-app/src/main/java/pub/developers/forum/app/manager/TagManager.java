@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.api.model.PageRequestModel;
 import pub.developers.forum.api.model.PageResponseModel;
-import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.tag.TagCreateRequest;
 import pub.developers.forum.api.request.tag.TagPageRequest;
 import pub.developers.forum.api.response.tag.TagPageResponse;
@@ -43,11 +42,18 @@ public class TagManager extends AbstractPostsManager {
     @Resource
     private CacheService cacheService;
 
-    @IsLogin(role = UserRoleEn.ADMIN)
-    public void create(TagCreateRequest request) {
-        CheckUtil.isNotEmpty(tagRepository.query(Tag.builder().name(request.getName()).build()), ErrorCodeEn.TAG_IS_EXIST);
+    public Tag create(TagCreateRequest request) {
+        List<Tag> exist = tagRepository.query(Tag.builder().name(request.getName()).build());
+        if (!exist.isEmpty()) {
+            // 名称已存在：直接复用旧标签，不报错、不重复插入，标记 existed 供前端区分
+            Tag existTag = exist.get(0);
+            existTag.setExisted(true);
+            return existTag;
+        }
 
-        tagRepository.save(TagTransfer.toTag(request));
+        Tag tag = TagTransfer.toTag(request);
+        tagRepository.save(tag);
+        return tag;
     }
 
     public List<TagQueryResponse> queryAll() {
@@ -99,12 +105,11 @@ public class TagManager extends AbstractPostsManager {
     }
 
     @IsLogin(role = UserRoleEn.ADMIN)
-    public void tagAuditState(AdminBooleanRequest booleanRequest) {
-        Tag tag = tagRepository.get(booleanRequest.getId());
+    public void delete(Long id) {
+        Tag tag = tagRepository.get(id);
         CheckUtil.isEmpty(tag, ErrorCodeEn.TAG_NOT_EXIST);
 
-        tag.setAuditState(booleanRequest.getIs() ? AuditStateEn.PASS : AuditStateEn.REJECT);
-        tagRepository.update(tag);
+        tagRepository.delete(id);
     }
 
     public List<TagQueryResponse> queryAllRef() {

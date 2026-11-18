@@ -21,10 +21,8 @@ public class TagTransfer {
 
     public static Tag toTag(TagCreateRequest request) {
         return Tag.builder()
-                .groupName(request.getGroupName())
-                .auditState(AuditStateEn.WAIT)
+                .auditState(AuditStateEn.PASS)
                 .creatorId(LoginUserContext.getUser().getId())
-                .description(request.getDescription())
                 .name(request.getName())
                 .refCount(0L)
                 .build();
@@ -39,11 +37,10 @@ public class TagTransfer {
 
     public static TagQueryResponse toTagQueryAllResponse(Tag tag) {
         return TagQueryResponse.builder()
-                .description(tag.getDescription())
-                .groupName(tag.getGroupName())
                 .id(tag.getId())
                 .name(tag.getName())
                 .refCount(tag.getRefCount())
+                .existed(tag.getExisted())
                 .build();
     }
 

@@ -3,7 +3,6 @@ package pub.developers.forum.api.service;
 import pub.developers.forum.api.model.PageRequestModel;
 import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.model.ResultModel;
-import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.tag.TagCreateRequest;
 import pub.developers.forum.api.request.tag.TagPageRequest;
 import pub.developers.forum.api.response.tag.TagPageResponse;
@@ -22,7 +21,7 @@ public interface TagApiService {
 
     ResultModel<List<TagQueryResponse>> queryAllRef();
 
-    ResultModel create(TagCreateRequest request);
+    ResultModel<TagQueryResponse> create(TagCreateRequest request);
 
     ResultModel<TagQueryResponse> getByName(String name);
 
@@ -36,5 +35,5 @@ public interface TagApiService {
 
     ResultModel<PageResponseModel<TagPageResponse>> page(PageRequestModel<TagPageRequest> pageRequestModel);
 
-    ResultModel auditState(AdminBooleanRequest booleanRequest);
+    ResultModel delete(Long id);
 }

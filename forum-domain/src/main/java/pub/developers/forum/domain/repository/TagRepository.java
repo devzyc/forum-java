@@ -42,4 +42,6 @@ public interface TagRepository {
     Tag get(Long id);
 
     void update(Tag tag);
+
+    void delete(Long id);
 }
