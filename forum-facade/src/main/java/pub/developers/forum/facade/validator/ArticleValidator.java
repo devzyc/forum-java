@@ -3,7 +3,9 @@ package pub.developers.forum.facade.validator;
 import pub.developers.forum.api.request.article.ArticleAddTypeRequest;
 import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.article.ArticleSaveArticleRequest;
+import pub.developers.forum.common.enums.ErrorCodeEn;
 import pub.developers.forum.common.support.CheckUtil;
+import org.springframework.util.ObjectUtils;
 
 /**
  * @author Qiangqiang.Bian
@@ -29,6 +31,7 @@ public class ArticleValidator {
         CheckUtil.checkParamToast(request.getContentType(), "contentType");
         CheckUtil.checkParamToast(request.getMarkdownContent(), "markdownContent");
         CheckUtil.checkParamToast(request.getHtmlContent(), "htmlContent");
-        CheckUtil.checkParamToast(request.getTagIds(), "tagIds");
+        // tagIds 与 tagNames 至少传一个（纯文字标签新建场景允许 tagIds 为空）
+        CheckUtil.isFalse(!ObjectUtils.isEmpty(request.getTagIds()) || !ObjectUtils.isEmpty(request.getTagNames()), ErrorCodeEn.TAG_NOT_EMPTY);
     }
 }

@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.api.model.PageRequestModel;
 import pub.developers.forum.api.model.PageResponseModel;
-import pub.developers.forum.api.request.tag.TagCreateRequest;
 import pub.developers.forum.api.request.tag.TagPageRequest;
 import pub.developers.forum.api.response.tag.TagPageResponse;
 import pub.developers.forum.api.response.tag.TagQueryResponse;
@@ -42,16 +41,14 @@ public class TagManager extends AbstractPostsManager {
     @Resource
     private CacheService cacheService;
 
-    public Tag create(TagCreateRequest request) {
-        List<Tag> exist = tagRepository.query(Tag.builder().name(request.getName()).build());
+    public Tag resolveOrCreate(String name) {
+        List<Tag> exist = tagRepository.query(Tag.builder().name(name).build());
         if (!exist.isEmpty()) {
-            // 名称已存在：直接复用旧标签，不报错、不重复插入，标记 existed 供前端区分
-            Tag existTag = exist.get(0);
-            existTag.setExisted(true);
-            return existTag;
+            // 名称已存在：直接复用旧标签，不报错、不重复插入
+            return exist.get(0);
         }
 
-        Tag tag = TagTransfer.toTag(request);
+        Tag tag = TagTransfer.toTag(name);
         tagRepository.save(tag);
         return tag;
     }

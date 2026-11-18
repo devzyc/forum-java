@@ -4,19 +4,15 @@ import org.springframework.stereotype.Service;
 import pub.developers.forum.api.model.PageRequestModel;
 import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.model.ResultModel;
-import pub.developers.forum.api.request.tag.TagCreateRequest;
 import pub.developers.forum.api.request.tag.TagPageRequest;
 import pub.developers.forum.api.response.tag.TagPageResponse;
 import pub.developers.forum.api.response.tag.TagQueryResponse;
 import pub.developers.forum.api.service.TagApiService;
 import pub.developers.forum.api.vo.PostsVO;
 import pub.developers.forum.app.manager.TagManager;
-import pub.developers.forum.app.transfer.TagTransfer;
 import pub.developers.forum.common.support.CheckUtil;
-import pub.developers.forum.domain.entity.Tag;
 import pub.developers.forum.facade.support.ResultModelUtil;
 import pub.developers.forum.facade.validator.PageRequestModelValidator;
-import pub.developers.forum.facade.validator.TagValidator;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -36,15 +32,6 @@ public class TagApiServiceImpl implements TagApiService {
     @Override
     public ResultModel<List<TagQueryResponse>> queryAllRef() {
         return ResultModelUtil.success(tagManager.queryAllRef());
-    }
-
-    @Override
-    public ResultModel<TagQueryResponse> create(TagCreateRequest request) {
-        TagValidator.create(request);
-
-        Tag tag = tagManager.create(request);
-
-        return ResultModelUtil.success(TagTransfer.toTagQueryAllResponse(tag));
     }
 
     @Override

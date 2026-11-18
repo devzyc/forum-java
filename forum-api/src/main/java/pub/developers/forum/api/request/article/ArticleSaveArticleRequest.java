@@ -35,4 +35,9 @@ public class ArticleSaveArticleRequest implements Serializable {
 
     private Set<Long> tagIds;
 
+    /**
+     * 用户新敲的文字标签（不在已有标签列表里的），后端按名复用或自动创建后与 tagIds 合并
+     */
+    private Set<String> tagNames;
+
 }

@@ -28,8 +28,8 @@ public class TagQueryResponse implements Serializable {
     private Long refCount;
 
     /**
-     * 名称是否已存在（仅新建标签接口的"已有他人同名标签、直接复用"场景为 true，其余场景恒为 null）
+     * 是否为热门标签（refCount 排名前10），动态计算不入库
      */
-    private Boolean existed;
+    private Boolean isHot;
 
 }

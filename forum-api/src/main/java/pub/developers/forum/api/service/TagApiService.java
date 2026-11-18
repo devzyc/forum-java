@@ -3,7 +3,6 @@ package pub.developers.forum.api.service;
 import pub.developers.forum.api.model.PageRequestModel;
 import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.model.ResultModel;
-import pub.developers.forum.api.request.tag.TagCreateRequest;
 import pub.developers.forum.api.request.tag.TagPageRequest;
 import pub.developers.forum.api.response.tag.TagPageResponse;
 import pub.developers.forum.api.response.tag.TagQueryResponse;
@@ -20,8 +19,6 @@ import java.util.Set;
 public interface TagApiService {
 
     ResultModel<List<TagQueryResponse>> queryAllRef();
-
-    ResultModel<TagQueryResponse> create(TagCreateRequest request);
 
     ResultModel<TagQueryResponse> getByName(String name);
 

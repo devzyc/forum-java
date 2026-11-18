@@ -51,6 +51,7 @@ public enum ErrorCodeEn {
     TAG_IS_EXIST(7989, "标签已存在"),
     TAG_NOT_EMPTY(7997, "标签不能为空"),
     TAG_NOT_EXIST(7996, "标签不存在"),
+    TAG_COUNT_EXCEED_LIMIT(7985, "标签数量超过上限，单篇文章最多 20 个"),
 
     MESSAGE_SYSTEM_MAIL_SEND_FAIL(6999, "系统邮件发送失败"),
     MESSAGE_DING_DING_SEND_RES_FAIL(6998, "发送钉钉群机器人消息返回失败"),

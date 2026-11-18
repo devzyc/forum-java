@@ -20,6 +20,7 @@ import pub.developers.forum.common.enums.*;
 import pub.developers.forum.common.model.PageResult;
 import pub.developers.forum.common.support.CheckUtil;
 import pub.developers.forum.common.support.EventBus;
+import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.*;
 import pub.developers.forum.domain.entity.value.PostsPageQueryValue;
 import pub.developers.forum.domain.repository.ArticleRepository;
@@ -28,6 +29,7 @@ import pub.developers.forum.domain.repository.ArticleTypeRepository;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -48,6 +50,14 @@ public class ArticleManager extends AbstractPostsManager {
 
     private static final Long INIT_SORT = 1000L;
 
+    /**
+     * 单篇文章标签上限（tagIds + tagNames 合并后），防止批量制造空标签
+     */
+    private static final int MAX_TAG_COUNT = 20;
+
+    @Resource
+    private TagManager tagManager;
+
     @IsLogin
     @Transactional
     public Long saveArticle(ArticleSaveArticleRequest request) {
@@ -56,8 +66,8 @@ public class ArticleManager extends AbstractPostsManager {
             // 校验类型
             ArticleType articleType = checkArticleType(request.getTypeId());
 
-            // 校验标签
-            Set<Tag> selectTags = checkTags(request.getTagIds());
+            // 校验标签（已有 tagIds + 用户新敲文字标签 tagNames 合并解析）
+            Set<Tag> selectTags = resolveTags(request.getTagIds(), request.getTagNames());
 
             Article article = ArticleTransfer.toArticle(request, articleType, selectTags, false, INIT_SORT);
             articleRepository.save(article);
@@ -77,8 +87,8 @@ public class ArticleManager extends AbstractPostsManager {
         // 校验类型
         ArticleType articleType = checkArticleType(request.getTypeId());
 
-        // 校验标签
-        Set<Tag> selectTags = checkTags(request.getTagIds());
+        // 校验标签（已有 tagIds + 用户新敲文字标签 tagNames 合并解析）
+        Set<Tag> selectTags = resolveTags(request.getTagIds(), request.getTagNames());
 
         // 删除旧标签关联关系
         tagRepository.deletePostsMapping(request.getId());
@@ -266,6 +276,20 @@ public class ArticleManager extends AbstractPostsManager {
         PageResult<Article> pageResult = articleRepository.page(pageRequestModel.getPageNo(), pageRequestModel.getPageSize(), pageQueryValue);
 
         return PageResponseModel.build(pageResult.getTotal(), pageResult.getSize(), ArticleTransfer.toArticleUserPageResponses(pageResult.getList()));
+    }
+
+    private Set<Tag> resolveTags(Set<Long> tagIds, Set<String> tagNames) {
+        // 合并已有标签 ID 与新文字标签解析出的 ID（新名按名复用或自动创建），去重
+        Set<Long> mergedIds = new HashSet<>(SafesUtil.ofSet(tagIds));
+        for (String name : SafesUtil.ofSet(tagNames)) {
+            if (!ObjectUtils.isEmpty(name) && !name.trim().isEmpty()) {
+                mergedIds.add(tagManager.resolveOrCreate(name.trim()).getId());
+            }
+        }
+
+        CheckUtil.isTrue(mergedIds.size() > MAX_TAG_COUNT, ErrorCodeEn.TAG_COUNT_EXCEED_LIMIT);
+
+        return checkTags(mergedIds);
     }
 
     private ArticleType checkArticleType(Long typeId) {
