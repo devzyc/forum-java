@@ -6,7 +6,6 @@ import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.model.ResultModel;
 import pub.developers.forum.api.request.article.ArticleSaveArticleRequest;
 import pub.developers.forum.api.response.article.ArticleInfoResponse;
-import pub.developers.forum.api.response.article.ArticleQueryTypesResponse;
 import pub.developers.forum.api.response.comment.CommentPageResponse;
 import pub.developers.forum.api.service.ArticleApiService;
 import pub.developers.forum.api.service.CommentApiService;
@@ -39,11 +38,6 @@ public class ArticleRestController {
     @PostMapping("/{id}")
     public ResultModel<ArticleInfoResponse> get(@PathVariable("id") Long id) {
         return articleApiService.info(id);
-    }
-
-    @PostMapping("/editArticleTypes")
-    public ResultModel<List<ArticleQueryTypesResponse>> getAllType() {
-        return articleApiService.queryEditArticleTypes();
     }
 
     /**

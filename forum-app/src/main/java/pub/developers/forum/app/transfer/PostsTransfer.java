@@ -43,7 +43,7 @@ public class PostsTransfer {
                     .createAt(posts.getCreateAt())
                     .headImg(posts.getHeadImg())
                     .id(posts.getId())
-                    .introduction(posts.getMarkdownContent())
+                    .introduction(posts.getHtmlContent())
                     .marrow(posts.getMarrow())
                     .official(posts.getOfficial())
                     .tags(SafesUtil.ofSet(posts.getTags()).stream().map(tag -> {

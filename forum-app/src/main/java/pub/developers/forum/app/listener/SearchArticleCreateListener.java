@@ -30,7 +30,7 @@ public class SearchArticleCreateListener extends EventBus.EventHandler<Article> 
         searchService.deleteByPostsId(article.getId());
 
         searchService.save(Search.builder()
-                .content(article.getMarkdownContent())
+                .content(article.getHtmlContent())
                 .entityId(article.getId())
                 .title(article.getTitle())
                 .type(SearchTypeEn.POSTS)

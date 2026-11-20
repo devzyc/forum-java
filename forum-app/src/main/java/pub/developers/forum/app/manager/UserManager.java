@@ -123,6 +123,11 @@ public class UserManager extends AbstractLoginManager {
 
     /**
      * 获取 token 对应用户详情
+     * <p>
+     * 这是 GlobalViewInterceptor 每个带 token 的请求都会调用的入口，
+     * 滑动续期必须放在这里而不是 LoginUserAspect——后者在 pjp.proceed() 之后才执行，
+     * 而 info() 已经跑完，等于续期逻辑从未被触发。
+     *
      * @param token
      * @return
      */
@@ -130,7 +135,15 @@ public class UserManager extends AbstractLoginManager {
         String cacheUserStr = cacheService.get(CacheBizTypeEn.USER_LOGIN_TOKEN, token);
         CheckUtil.isEmpty(cacheUserStr, ErrorCodeEn.USER_TOKEN_INVALID);
 
-        return UserTransfer.toUserInfoResponse(JSON.parseObject(cacheUserStr, User.class));
+        User user = JSON.parseObject(cacheUserStr, User.class);
+
+        // 滑动续期：token=>user 与 uid=>token 两条 key 必须成对刷新
+        cacheService.renew(CacheBizTypeEn.USER_LOGIN_TOKEN, token);
+        if (!ObjectUtils.isEmpty(user.getId())) {
+            cacheService.renew(CacheBizTypeEn.USER_LOGIN_TOKEN, String.valueOf(user.getId()));
+        }
+
+        return UserTransfer.toUserInfoResponse(user);
     }
 
     public UserInfoResponse info(Long uid) {

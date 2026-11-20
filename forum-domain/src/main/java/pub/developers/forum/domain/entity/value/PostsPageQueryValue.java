@@ -23,8 +23,6 @@ public class PostsPageQueryValue implements Serializable {
 
     private List<String> auditStates;
 
-    private Long typeId;
-
     private Long authorId;
 
     private String title;
@@ -34,8 +32,6 @@ public class PostsPageQueryValue implements Serializable {
     private Boolean top;
 
     private Boolean marrow;
-
-    private String markdownContent;
 
     /**
      * 1 => 未解决

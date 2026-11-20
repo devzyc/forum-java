@@ -2,7 +2,6 @@ package pub.developers.forum.infrastructure.transfer;
 
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.common.enums.AuditStateEn;
-import pub.developers.forum.common.enums.ContentTypeEn;
 import pub.developers.forum.common.enums.PostsCategoryEn;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.*;
@@ -33,7 +32,6 @@ public class PostsTransfer {
                 }
 
                 Posts posts = Posts.builder()
-                        .type(null)
                         .headImg(postsDO.getHeadImg())
                         .marrow(postsDO.getMarrow())
                         .official(postsDO.getOfficial())
@@ -62,7 +60,7 @@ public class PostsTransfer {
                     return;
                 }
 
-                articles.add(toArticle(postsDO, user, null, toTags(postsDO, tagPostsMappingDOS, tags)));
+                articles.add(toArticle(postsDO, user, toTags(postsDO, tagPostsMappingDOS, tags)));
             });
         });
 
@@ -96,7 +94,6 @@ public class PostsTransfer {
                 .official(article.getOfficial())
                 .sort(article.getSort())
                 .top(article.getTop())
-                .typeId(article.getType().getId())
                 .build();
 
         pickPostsDO(postsDO, article);
@@ -111,16 +108,13 @@ public class PostsTransfer {
         postsDO.setAuditState(basePosts.getAuditState().getValue());
         postsDO.setAuthorId(basePosts.getAuthor().getId());
         postsDO.setComments(basePosts.getComments());
-        postsDO.setContentType(basePosts.getContentType().getValue());
-        postsDO.setHtmlContent(basePosts.getHtmlContent());
-        postsDO.setMarkdownContent(basePosts.getMarkdownContent());
+        postsDO.setHtmlContent(basePosts.getHtmlContent() != null ? basePosts.getHtmlContent() : "");
         postsDO.setTitle(basePosts.getTitle());
         postsDO.setViews(basePosts.getViews());
     }
 
-    public static Article toArticle(PostsDO postsDO, User user, ArticleType articleType, List<Tag> tags) {
+    public static Article toArticle(PostsDO postsDO, User user, List<Tag> tags) {
         Article article = Article.builder()
-                .type(articleType)
                 .headImg(postsDO.getHeadImg())
                 .marrow(postsDO.getMarrow())
                 .official(postsDO.getOfficial())
@@ -170,13 +164,10 @@ public class PostsTransfer {
         basePosts.setCategory(PostsCategoryEn.valueOf(postsDO.getCategory()));
         basePosts.setTitle(postsDO.getTitle());
         basePosts.setAuditState(AuditStateEn.getEntity(postsDO.getAuditState()));
-        basePosts.setContentType(ContentTypeEn.getEntity(postsDO.getContentType()));
-        basePosts.setMarkdownContent(postsDO.getMarkdownContent());
         basePosts.setHtmlContent(postsDO.getHtmlContent());
         basePosts.setComments(postsDO.getComments());
         basePosts.setApprovals(postsDO.getApprovals());
         basePosts.setViews(postsDO.getViews());
-        basePosts.setTypeId(postsDO.getTypeId());
         basePosts.setAuthorId(postsDO.getAuthorId());
 
         basePosts.setOfficial(postsDO.getOfficial());

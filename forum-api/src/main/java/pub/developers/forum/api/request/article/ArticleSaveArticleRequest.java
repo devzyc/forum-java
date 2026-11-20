@@ -21,13 +21,7 @@ public class ArticleSaveArticleRequest implements Serializable {
 
     private Long id;
 
-    private Long typeId;
-
     private String title;
-
-    private String contentType;
-
-    private String markdownContent;
 
     private String htmlContent;
 

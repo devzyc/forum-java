@@ -23,8 +23,6 @@ public class ArticleInfoResponse implements Serializable {
 
     private Long id;
 
-    private Long typeId;
-
     private String auditState;
 
     private Boolean official;
@@ -36,8 +34,6 @@ public class ArticleInfoResponse implements Serializable {
     private String title;
 
     private String htmlContent;
-
-    private String markdownContent;
 
     private String headImg;
 

@@ -12,13 +12,10 @@
         <result column="category" property="category"/>
         <result column="author_id" property="authorId"/>
         <result column="title" property="title"/>
-        <result column="content_type" property="contentType"/>
-        <result column="markdown_content" property="markdownContent"/>
         <result column="html_content" property="htmlContent"/>
         <result column="views" property="views"/>
         <result column="approvals" property="approvals"/>
         <result column="comments" property="comments"/>
-        <result column="type_id" property="typeId"/>
         <result column="head_img" property="headImg"/>
         <result column="official" property="official"/>
         <result column="top" property="top"/>
@@ -29,8 +26,8 @@
 
     <sql id="all_column">
         id, is_delete, create_at, update_at,
-        audit_state, category, author_id, title, content_type, markdown_content,html_content,
-        views, approvals, comments, type_id, head_img, official, top, sort, marrow, comment_id
+        audit_state, category, author_id, title, html_content,
+        views, approvals, comments, head_img, official, top, sort, marrow, comment_id
     </sql>
 
     <sql id="table_name">forum_posts</sql>
@@ -50,12 +47,6 @@
             <if test="title != null">
                 and title = #{title}
             </if>
-            <if test="contentType != null">
-                and content_type = #{contentType}
-            </if>
-            <if test="markdownContent != null">
-                and markdown_content = #{markdownContent}
-            </if>
             <if test="htmlContent != null">
                 and html_content = #{htmlContent}
             </if>
@@ -67,9 +58,6 @@
             </if>
             <if test="comments != null">
                 and comments = #{comments}
-            </if>
-            <if test="typeId != null">
-                and type_id = #{typeId}
             </if>
             <if test="headImg != null">
                 and head_img = #{headImg}
@@ -110,9 +98,6 @@
             <if test="title != null">
                 and title = #{title}
             </if>
-            <if test="markdownContent != null">
-                and markdown_content = #{markdownContent}
-            </if>
             <if test="official != null">
                 and official = #{official}
             </if>
@@ -121,9 +106,6 @@
             </if>
             <if test="marrow != null">
                 and marrow = #{marrow}
-            </if>
-            <if test="typeId != null">
-                and type_id = #{typeId}
             </if>
             <if test="commentId == 1">
                 and comment_id = 0
@@ -136,21 +118,18 @@
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="pub.developers.forum.infrastructure.dal.dataobject.PostsDO">
         INSERT INTO <include refid="table_name"/>
-        ( audit_state, category, author_id, title, content_type, markdown_content, html_content,
-        views, approvals, comments, type_id, head_img, official, top, sort, marrow, comment_id, create_at )
+        ( audit_state, category, author_id, title, html_content,
+        views, approvals, comments, head_img, official, top, sort, marrow, comment_id, create_at )
         VALUES
         (
         #{auditState},
         #{category},
         #{authorId},
         #{title},
-        #{contentType},
-        #{markdownContent},
         #{htmlContent},
         #{views},
         #{approvals},
         #{comments},
-        #{typeId},
         #{headImg},
         #{official},
         #{top},
@@ -182,13 +161,10 @@
             <if test ='null != auditState'>audit_state = #{auditState},</if>
             <if test ='null != category'>category = #{category},</if>
             <if test ='null != title'>title = #{title},</if>
-            <if test ='null != contentType'>content_type = #{contentType},</if>
-            <if test ='null != markdownContent'>markdown_content = #{markdownContent},</if>
             <if test ='null != htmlContent'>html_content = #{htmlContent},</if>
             <if test ='null != views'>views = #{views},</if>
             <if test ='null != approvals'>approvals = #{approvals},</if>
             <if test ='null != comments'>comments = #{comments},</if>
-            <if test ='null != typeId'>type_id = #{typeId},</if>
             <if test ='null != headImg'>head_img = #{headImg},</if>
             <if test ='null != official'>official = #{official},</if>
             <if test ='null != top'>top = #{top},</if>

@@ -18,8 +18,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ArticleAdminPageRequest implements Serializable {
 
-    private Long typeId;
-
     private String auditState;
 
     private Boolean official;

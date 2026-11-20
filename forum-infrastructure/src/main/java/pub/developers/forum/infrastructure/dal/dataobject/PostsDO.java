@@ -24,10 +24,6 @@ public class PostsDO extends BaseDO {
 
     private String title;
 
-    private String contentType;
-
-    private String markdownContent;
-
     private String htmlContent;
 
     private Long views;
@@ -35,8 +31,6 @@ public class PostsDO extends BaseDO {
     private Long approvals;
 
     private Long comments;
-
-    private Long typeId;
 
     private String headImg;
 

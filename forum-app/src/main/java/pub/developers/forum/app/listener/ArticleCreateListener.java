@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 import pub.developers.forum.common.support.EventBus;
 import pub.developers.forum.domain.entity.Article;
 import pub.developers.forum.domain.entity.Tag;
-import pub.developers.forum.domain.repository.ArticleTypeRepository;
 import pub.developers.forum.domain.repository.TagRepository;
 
 import javax.annotation.Resource;
@@ -22,9 +21,6 @@ public class ArticleCreateListener extends EventBus.EventHandler<Article> {
     @Resource
     private TagRepository tagRepository;
 
-    @Resource
-    private ArticleTypeRepository articleTypeRepository;
-
     @Override
     public EventBus.Topic topic() {
         return EventBus.Topic.ARTICLE_CREATE;
@@ -34,7 +30,5 @@ public class ArticleCreateListener extends EventBus.EventHandler<Article> {
     public void onMessage(Article article) {
         Set<Long> tagIds = article.getTags().stream().map(Tag::getId).collect(Collectors.toSet());
         tagRepository.increaseRefCount(tagIds);
-
-        articleTypeRepository.increaseRefCount(article.getType().getId());
     }
 }

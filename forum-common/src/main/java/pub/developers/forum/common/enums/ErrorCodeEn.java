@@ -59,7 +59,6 @@ public enum ErrorCodeEn {
     MESSAGE_QIYE_WX_SEND_RES_FAIL(6996, "发送企业微信群机器人消息返回失败"),
     MESSAGE_QIYE_WX_SEND_FAIL(6995, "发送企业微信群机器人消息异常"),
 
-    ARTICLE_TYPE_IS_EXIST(5999, "文章类型已存在"),
     ARTICLE_NOT_EXIST(5998, "文章不存在"),
     ARTICLE_IN_AUDIT_PROCESS(5997, "文章审核中"),
 

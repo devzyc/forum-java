@@ -1,6 +1,5 @@
 package pub.developers.forum.facade.validator;
 
-import pub.developers.forum.api.request.article.ArticleAddTypeRequest;
 import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.article.ArticleSaveArticleRequest;
 import pub.developers.forum.common.enums.ErrorCodeEn;
@@ -20,16 +19,9 @@ public class ArticleValidator {
         CheckUtil.checkParamToast(booleanRequest.getIs(), "is");
     }
 
-    public static void addType(ArticleAddTypeRequest request) {
-
-    }
-
     public static void saveArticle(ArticleSaveArticleRequest request) {
         CheckUtil.checkParamToast(request, "request");
-        CheckUtil.checkParamToast(request.getTypeId(), "typeId");
         CheckUtil.checkParamToast(request.getTitle(), "title");
-        CheckUtil.checkParamToast(request.getContentType(), "contentType");
-        CheckUtil.checkParamToast(request.getMarkdownContent(), "markdownContent");
         CheckUtil.checkParamToast(request.getHtmlContent(), "htmlContent");
         // tagIds 与 tagNames 至少传一个（纯文字标签新建场景允许 tagIds 为空）
         CheckUtil.isFalse(!ObjectUtils.isEmpty(request.getTagIds()) || !ObjectUtils.isEmpty(request.getTagNames()), ErrorCodeEn.TAG_NOT_EMPTY);

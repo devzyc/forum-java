@@ -7,7 +7,6 @@ import pub.developers.forum.api.model.ResultModel;
 import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.article.*;
 import pub.developers.forum.api.response.article.ArticleInfoResponse;
-import pub.developers.forum.api.response.article.ArticleQueryTypesResponse;
 import pub.developers.forum.api.response.article.ArticleUserPageResponse;
 import pub.developers.forum.api.service.ArticleApiService;
 import pub.developers.forum.app.manager.ArticleManager;
@@ -16,7 +15,6 @@ import pub.developers.forum.facade.validator.ArticleValidator;
 import pub.developers.forum.facade.validator.PageRequestModelValidator;
 
 import javax.annotation.Resource;
-import java.util.List;
 
 /**
  * @author Qiangqiang.Bian
@@ -30,27 +28,10 @@ public class ArticleApiServiceImpl implements ArticleApiService {
     private ArticleManager articleManager;
 
     @Override
-    public ResultModel<List<ArticleQueryTypesResponse>> queryAllTypes() {
-        return ResultModelUtil.success(articleManager.queryAllTypes());
-    }
+    public ResultModel<PageResponseModel<ArticleUserPageResponse>> adminPage(PageRequestModel<ArticleAdminPageRequest> pageRequestModel) {
+        PageRequestModelValidator.validator(pageRequestModel);
 
-    @Override
-    public ResultModel<List<ArticleQueryTypesResponse>> queryAdminTypes() {
-        return ResultModelUtil.success(articleManager.queryAdminTypes());
-    }
-
-    @Override
-    public ResultModel<List<ArticleQueryTypesResponse>> queryEditArticleTypes() {
-        return ResultModelUtil.success(articleManager.queryEditArticleTypes());
-    }
-
-    @Override
-    public ResultModel addType(ArticleAddTypeRequest request) {
-        ArticleValidator.addType(request);
-
-        articleManager.addType(request);
-
-        return ResultModelUtil.success();
+        return ResultModelUtil.success(articleManager.adminPage(pageRequestModel));
     }
 
     @Override
@@ -61,24 +42,10 @@ public class ArticleApiServiceImpl implements ArticleApiService {
     }
 
     @Override
-    public ResultModel<PageResponseModel<ArticleUserPageResponse>> userPage(PageRequestModel<ArticleUserPageRequest> pageRequestModel) {
-        PageRequestModelValidator.validator(pageRequestModel);
-
-        return ResultModelUtil.success(articleManager.userPage(pageRequestModel));
-    }
-
-    @Override
     public ResultModel<PageResponseModel<ArticleUserPageResponse>> authorPage(PageRequestModel<ArticleAuthorPageRequest> pageRequestModel) {
         PageRequestModelValidator.validator(pageRequestModel);
 
         return ResultModelUtil.success(articleManager.authorPage(pageRequestModel));
-    }
-
-    @Override
-    public ResultModel<PageResponseModel<ArticleUserPageResponse>> adminPage(PageRequestModel<ArticleAdminPageRequest> pageRequestModel) {
-        PageRequestModelValidator.validator(pageRequestModel);
-
-        return ResultModelUtil.success(articleManager.adminPage(pageRequestModel));
     }
 
     @Override
@@ -110,22 +77,6 @@ public class ArticleApiServiceImpl implements ArticleApiService {
         ArticleValidator.validatorBooleanRequest(booleanRequest);
 
         articleManager.adminMarrow(booleanRequest);
-
-        return ResultModelUtil.success();
-    }
-
-    @Override
-    public ResultModel<PageResponseModel<ArticleQueryTypesResponse>> typePage(PageRequestModel<ArticleAdminTypePageRequest> pageRequestModel) {
-        PageRequestModelValidator.validator(pageRequestModel);
-
-        return ResultModelUtil.success(articleManager.typePage(pageRequestModel));
-    }
-
-    @Override
-    public ResultModel typeAuditState(AdminBooleanRequest booleanRequest) {
-        ArticleValidator.validatorBooleanRequest(booleanRequest);
-
-        articleManager.typeAuditState(booleanRequest);
 
         return ResultModelUtil.success();
     }

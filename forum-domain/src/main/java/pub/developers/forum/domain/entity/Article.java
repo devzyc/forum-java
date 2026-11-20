@@ -17,8 +17,6 @@ import org.springframework.beans.BeanUtils;
 @NoArgsConstructor
 public class Article extends BasePosts {
 
-    private ArticleType type;
-
     private String headImg;
 
     private Boolean official;

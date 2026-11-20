@@ -7,14 +7,12 @@ import org.springframework.util.ObjectUtils;
 import pub.developers.forum.common.model.PageResult;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.Article;
-import pub.developers.forum.domain.entity.ArticleType;
 import pub.developers.forum.domain.entity.Tag;
 import pub.developers.forum.domain.entity.User;
 import pub.developers.forum.domain.entity.value.PostsPageQueryValue;
 import pub.developers.forum.domain.repository.ArticleRepository;
 import pub.developers.forum.infrastructure.dal.dao.*;
 import pub.developers.forum.infrastructure.dal.dataobject.*;
-import pub.developers.forum.infrastructure.transfer.ArticleTypeTransfer;
 import pub.developers.forum.infrastructure.transfer.PostsTransfer;
 import pub.developers.forum.infrastructure.transfer.TagTransfer;
 import pub.developers.forum.infrastructure.transfer.UserTransfer;
@@ -36,9 +34,6 @@ public class ArticleRepositoryImpl implements ArticleRepository {
 
     @Resource
     private PostsDAO postsDAO;
-
-    @Resource
-    private ArticleTypeDAO articleTypeDAO;
 
     @Resource
     private TagPostsMappingDAO tagPostsMappingDAO;
@@ -81,8 +76,6 @@ public class ArticleRepositoryImpl implements ArticleRepository {
         }
         User user = UserTransfer.toUser(userDO);
 
-        ArticleType articleType = ArticleTypeTransfer.toArticleType(articleTypeDAO.get(postsDO.getTypeId()));
-
         List<TagPostsMappingDO> tagPostsMappingDOS = tagPostsMappingDAO.query(TagPostsMappingDO.builder()
                 .postsId(id)
                 .build());
@@ -90,12 +83,12 @@ public class ArticleRepositoryImpl implements ArticleRepository {
                 .map(TagPostsMappingDO::getTagId)
                 .collect(Collectors.toSet());
         if (ObjectUtils.isEmpty(tagIds)) {
-            return PostsTransfer.toArticle(postsDO, user, articleType, new ArrayList<>());
+            return PostsTransfer.toArticle(postsDO, user, new ArrayList<>());
         }
 
         List<Tag> tags = TagTransfer.toTags(tagDAO.queryInIds(tagIds));
 
-        return PostsTransfer.toArticle(postsDO, user, articleType, tags);
+        return PostsTransfer.toArticle(postsDO, user, tags);
     }
 
     @Override

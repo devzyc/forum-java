@@ -9,11 +9,9 @@ import pub.developers.forum.api.model.PageResponseModel;
 import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.article.*;
 import pub.developers.forum.api.response.article.ArticleInfoResponse;
-import pub.developers.forum.api.response.article.ArticleQueryTypesResponse;
 import pub.developers.forum.api.response.article.ArticleUserPageResponse;
 import pub.developers.forum.app.support.IsLogin;
 import pub.developers.forum.app.support.LoginUserContext;
-import pub.developers.forum.app.support.PageUtil;
 import pub.developers.forum.app.support.Pair;
 import pub.developers.forum.app.transfer.ArticleTransfer;
 import pub.developers.forum.common.enums.*;
@@ -24,11 +22,9 @@ import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.*;
 import pub.developers.forum.domain.entity.value.PostsPageQueryValue;
 import pub.developers.forum.domain.repository.ArticleRepository;
-import pub.developers.forum.domain.repository.ArticleTypeRepository;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -41,9 +37,6 @@ import java.util.Set;
 @Slf4j
 @Component
 public class ArticleManager extends AbstractPostsManager {
-
-    @Resource
-    private ArticleTypeRepository articleTypeRepository;
 
     @Resource
     private ArticleRepository articleRepository;
@@ -63,13 +56,10 @@ public class ArticleManager extends AbstractPostsManager {
     public Long saveArticle(ArticleSaveArticleRequest request) {
         // 创建
         if (ObjectUtils.isEmpty(request.getId())) {
-            // 校验类型
-            ArticleType articleType = checkArticleType(request.getTypeId());
-
             // 校验标签（已有 tagIds + 用户新敲文字标签 tagNames 合并解析）
             Set<Tag> selectTags = resolveTags(request.getTagIds(), request.getTagNames());
 
-            Article article = ArticleTransfer.toArticle(request, articleType, selectTags, false, INIT_SORT);
+            Article article = ArticleTransfer.toArticle(request, selectTags, false, INIT_SORT);
             articleRepository.save(article);
 
             // 触发文章创建事件
@@ -84,9 +74,6 @@ public class ArticleManager extends AbstractPostsManager {
         CheckUtil.isEmpty(article, ErrorCodeEn.ARTICLE_NOT_EXIST);
         CheckUtil.isFalse(LoginUserContext.getUser().getId().equals(article.getAuthor().getId()), ErrorCodeEn.ARTICLE_NOT_EXIST);
 
-        // 校验类型
-        ArticleType articleType = checkArticleType(request.getTypeId());
-
         // 校验标签（已有 tagIds + 用户新敲文字标签 tagNames 合并解析）
         Set<Tag> selectTags = resolveTags(request.getTagIds(), request.getTagNames());
 
@@ -94,7 +81,7 @@ public class ArticleManager extends AbstractPostsManager {
         tagRepository.deletePostsMapping(request.getId());
 
         Article oldArticle = article.copy();
-        Article newArticle = ArticleTransfer.toArticle(request, articleType, selectTags, true, INIT_SORT);
+        Article newArticle = ArticleTransfer.toArticle(request, selectTags, true, INIT_SORT);
 
         articleRepository.update(newArticle);
 
@@ -102,77 +89,6 @@ public class ArticleManager extends AbstractPostsManager {
         EventBus.emit(EventBus.Topic.ARTICLE_UPDATE, Pair.build(oldArticle, newArticle));
 
         return request.getId();
-    }
-
-    public List<ArticleQueryTypesResponse> queryAllTypes() {
-        List<ArticleType> articleTypes = articleTypeRepository.queryByState(AuditStateEn.PASS);
-
-        return ArticleTransfer.toArticleQueryTypesResponses(articleTypes);
-    }
-
-    @IsLogin(role = UserRoleEn.ADMIN)
-    public List<ArticleQueryTypesResponse> queryAdminTypes() {
-        List<ArticleType> articleTypes = articleTypeRepository.queryByState(null);
-
-        return ArticleTransfer.toArticleQueryTypesResponses(articleTypes);
-    }
-
-    @IsLogin(role = UserRoleEn.ADMIN)
-    public PageResponseModel<ArticleQueryTypesResponse> typePage(PageRequestModel<ArticleAdminTypePageRequest> pageRequestModel) {
-        ArticleAdminTypePageRequest typePageRequest = pageRequestModel.getFilter();
-        ArticleType articleType = ArticleType.builder()
-                .name(typePageRequest.getName())
-                .description(typePageRequest.getDescription())
-                .build();
-        if (!ObjectUtils.isEmpty(typePageRequest.getAuditState())) {
-            articleType.setAuditState(AuditStateEn.getEntity(typePageRequest.getAuditState()));
-        }
-        if (!ObjectUtils.isEmpty(typePageRequest.getScope())) {
-            articleType.setScope(ArticleTypeScopeEn.getEntity(typePageRequest.getScope()));
-        }
-        PageResult<ArticleType> pageResult = articleTypeRepository.page(PageUtil.buildPageRequest(pageRequestModel, articleType));
-
-        return PageResponseModel.build(pageResult.getTotal(), pageResult.getSize(), ArticleTransfer.toArticleQueryTypesResponses(pageResult.getList()));
-    }
-
-    @IsLogin
-    public List<ArticleQueryTypesResponse> queryEditArticleTypes() {
-        List<ArticleTypeScopeEn> scopes = new ArrayList<>();
-        scopes.add(ArticleTypeScopeEn.USER);
-
-        User loginUser = LoginUserContext.getUser();
-        if (!UserRoleEn.USER.equals(loginUser.getRole() )) {
-            scopes.add(ArticleTypeScopeEn.OFFICIAL);
-        }
-
-        List<ArticleType> articleTypes = articleTypeRepository.queryByScopesAndState(scopes, AuditStateEn.PASS);
-
-        return ArticleTransfer.toArticleQueryTypesResponses(articleTypes);
-    }
-
-    @IsLogin(role = UserRoleEn.ADMIN)
-    public void addType(ArticleAddTypeRequest request) {
-        CheckUtil.isNotEmpty(articleTypeRepository.query(ArticleType.builder()
-                .name(request.getName())
-                .build()), ErrorCodeEn.ARTICLE_TYPE_IS_EXIST);
-
-        articleTypeRepository.save(ArticleTransfer.toArticleType(request));
-    }
-
-    public PageResponseModel<ArticleUserPageResponse> userPage(PageRequestModel<ArticleUserPageRequest> pageRequestModel) {
-        PostsPageQueryValue pageQueryValue = PostsPageQueryValue.builder()
-                .auditStates(Arrays.asList(AuditStateEn.PASS.getValue()))
-                .build();
-
-        ArticleUserPageRequest pageRequest = pageRequestModel.getFilter();
-        if (!ObjectUtils.isEmpty(pageRequest.getTypeName())) {
-            ArticleType articleType = articleTypeRepository.getByNameAndState(pageRequest.getTypeName(), AuditStateEn.PASS);
-            CheckUtil.isEmpty(articleType, ErrorCodeEn.ARTICLE_TYPE_IS_EXIST);
-
-            pageQueryValue.setTypeId(articleType.getId());
-        }
-
-        return pageQuery(pageRequestModel, pageQueryValue);
     }
 
     public PageResponseModel<ArticleUserPageResponse> authorPage(PageRequestModel<ArticleAuthorPageRequest> pageRequestModel) {
@@ -202,7 +118,6 @@ public class ArticleManager extends AbstractPostsManager {
         PostsPageQueryValue pageQueryValue = PostsPageQueryValue.builder()
                 .category(PostsCategoryEn.ARTICLE.getValue())
                 .authorId(request.getUserId())
-                .typeId(request.getTypeId())
                 .title(request.getTitle())
                 .official(request.getOfficial())
                 .marrow(request.getMarrow())
@@ -245,15 +160,6 @@ public class ArticleManager extends AbstractPostsManager {
         postsRepository.update(basePosts);
     }
 
-    @IsLogin(role = UserRoleEn.ADMIN)
-    public void typeAuditState(AdminBooleanRequest booleanRequest) {
-        ArticleType articleType = articleTypeRepository.get(booleanRequest.getId());
-        CheckUtil.isEmpty(articleType, ErrorCodeEn.ARTICLE_TYPE_IS_EXIST);
-
-        articleType.setAuditState(booleanRequest.getIs() ? AuditStateEn.PASS : AuditStateEn.REJECT);
-        articleTypeRepository.update(articleType);
-    }
-
     public ArticleInfoResponse info(Long id) {
         Article article = articleRepository.get(id);
         CheckUtil.isEmpty(article, ErrorCodeEn.ARTICLE_NOT_EXIST);
@@ -290,14 +196,6 @@ public class ArticleManager extends AbstractPostsManager {
         CheckUtil.isTrue(mergedIds.size() > MAX_TAG_COUNT, ErrorCodeEn.TAG_COUNT_EXCEED_LIMIT);
 
         return checkTags(mergedIds);
-    }
-
-    private ArticleType checkArticleType(Long typeId) {
-        ArticleType articleType = articleTypeRepository.get(typeId);
-        CheckUtil.isEmpty(articleType, ErrorCodeEn.ARTICLE_TYPE_IS_EXIST);
-        CheckUtil.isFalse(AuditStateEn.PASS.equals(articleType.getAuditState()), ErrorCodeEn.ARTICLE_TYPE_IS_EXIST);
-
-        return articleType;
     }
 
 }

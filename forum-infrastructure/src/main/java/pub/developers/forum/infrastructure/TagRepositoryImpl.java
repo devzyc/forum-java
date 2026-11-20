@@ -36,9 +36,6 @@ import java.util.stream.Collectors;
 @Repository
 public class TagRepositoryImpl extends AbstractPostsRepository implements TagRepository {
 
-    @Resource
-    private ArticleTypeDAO articleTypeDAO;
-
     @Override
     public void save(Tag tag) {
         TagDO tagDO = TagTransfer.toTagDO(tag);

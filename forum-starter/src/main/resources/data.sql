@@ -4,31 +4,6 @@ INSERT INTO `forum_user`(`id`, `email`, `nickname`, `password`, `role`, `state`,
 COMMIT;
 
 -- ----------------------------
--- Records of forum_article_type
--- ----------------------------
-BEGIN;
-INSERT INTO `forum_article_type` VALUES (1, 'PASS', '活动', '官方活动', 0, 'OFFICIAL', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (2, 'PASS', '公告', '官方公告', 0, 'OFFICIAL', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (3, 'PASS', '前端', '前端', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (4, 'PASS', '后端', '后端', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (5, 'PASS', '小程序', '小程序', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (6, 'PASS', '公众号', '公众号', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (7, 'PASS', 'iOS', 'iOS类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (8, 'PASS', 'Android', 'Android类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (9, 'PASS', 'AI', 'AI 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (10, 'PASS', '云计算', '云计算 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (11, 'PASS', '游戏', '游戏 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (12, 'PASS', '安全', '安全 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (13, 'PASS', '金融科技', '金融科技 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (14, 'PASS', '区块链', '区块链 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (15, 'PASS', '开源', '开源 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (16, 'PASS', '工具', '工具 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (17, 'PASS', '程序员', '程序员 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (18, 'PASS', '行业', '行业 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-INSERT INTO `forum_article_type` VALUES (19, 'PASS', '其他', '其他 类别', 0, 'USER', 2, 0, '2020-11-10 12:03:01', '2020-11-10 12:03:01');
-COMMIT;
-
--- ----------------------------
 -- Records of forum_tag
 -- ----------------------------
 BEGIN;

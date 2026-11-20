@@ -2,7 +2,6 @@ package pub.developers.forum.domain.entity;
 
 import lombok.Data;
 import pub.developers.forum.common.enums.AuditStateEn;
-import pub.developers.forum.common.enums.ContentTypeEn;
 import pub.developers.forum.common.enums.PostsCategoryEn;
 
 import java.util.Set;
@@ -23,10 +22,6 @@ public class BasePosts extends BaseEntity {
 
     private String title;
 
-    private ContentTypeEn contentType;
-
-    private String markdownContent;
-
     private String htmlContent;
 
     private Set<Tag> tags;
@@ -36,8 +31,6 @@ public class BasePosts extends BaseEntity {
     private Long approvals;
 
     private Long comments;
-
-    private Long typeId;
 
     private Long authorId;
 

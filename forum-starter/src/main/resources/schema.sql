@@ -2,25 +2,6 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for forum_article_type
--- ----------------------------
-DROP TABLE IF EXISTS `forum_article_type`;
-CREATE TABLE `forum_article_type` (
-  `id` bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `audit_state` varchar(64) NOT NULL COMMENT '审核状态',
-  `name` varchar(64) NOT NULL COMMENT '名称',
-  `description` varchar(1024) NOT NULL COMMENT '描述',
-  `ref_count` bigint(11) NOT NULL DEFAULT '0' COMMENT '引用统计',
-  `scope` varchar(32) NOT NULL COMMENT '作用域',
-  `creator_id` bigint(11) NOT NULL COMMENT '创建人',
-  `is_delete` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '删除标识（0:未删除、1:已删除）',
-  `create_at` datetime NOT NULL COMMENT '记录创建时间',
-  `update_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录修改时间',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uniq_name_state` (`name`,`audit_state`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='文章类别表';
-
--- ----------------------------
 -- Table structure for forum_cache
 -- ----------------------------
 DROP TABLE IF EXISTS `forum_cache`;
@@ -105,13 +86,10 @@ CREATE TABLE `forum_posts` (
   `category` varchar(64) NOT NULL COMMENT '类别',
   `author_id` bigint(11) NOT NULL COMMENT '作者ID',
   `title` varchar(256) NOT NULL COMMENT '标题',
-  `content_type` varchar(64) NOT NULL COMMENT '内容类型',
-  `markdown_content` longtext NOT NULL COMMENT 'markdown内容',
-  `html_content` longtext NOT NULL COMMENT 'html内容',
+  `html_content` longtext NULL COMMENT 'html内容',
   `views` bigint(11) NOT NULL DEFAULT '0' COMMENT '浏览量',
   `approvals` bigint(11) NOT NULL DEFAULT '0' COMMENT '点赞量/收藏量',
   `comments` bigint(11) NOT NULL DEFAULT '0' COMMENT '评论量',
-  `type_id` bigint(11) NOT NULL DEFAULT '0' COMMENT '文章类型ID',
   `head_img` varchar(8192) NOT NULL DEFAULT '' COMMENT '文章头图',
   `official` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '官方',
   `top` tinyint(2) unsigned NOT NULL DEFAULT '0' COMMENT '置顶',

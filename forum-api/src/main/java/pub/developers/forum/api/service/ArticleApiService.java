@@ -6,10 +6,7 @@ import pub.developers.forum.api.model.ResultModel;
 import pub.developers.forum.api.request.AdminBooleanRequest;
 import pub.developers.forum.api.request.article.*;
 import pub.developers.forum.api.response.article.ArticleInfoResponse;
-import pub.developers.forum.api.response.article.ArticleQueryTypesResponse;
 import pub.developers.forum.api.response.article.ArticleUserPageResponse;
-
-import java.util.List;
 
 /**
  * @author Qiangqiang.Bian
@@ -18,19 +15,9 @@ import java.util.List;
  **/
 public interface ArticleApiService {
 
-    ResultModel<List<ArticleQueryTypesResponse>> queryAllTypes();
-
-    ResultModel<List<ArticleQueryTypesResponse>> queryAdminTypes();
-
     ResultModel<PageResponseModel<ArticleUserPageResponse>> adminPage(PageRequestModel<ArticleAdminPageRequest> pageRequestModel);
 
-    ResultModel<List<ArticleQueryTypesResponse>> queryEditArticleTypes();
-
-    ResultModel addType(ArticleAddTypeRequest request);
-
     ResultModel<Long> saveArticle(ArticleSaveArticleRequest request);
-
-    ResultModel<PageResponseModel<ArticleUserPageResponse>> userPage(PageRequestModel<ArticleUserPageRequest> pageRequestModel);
 
     ResultModel<PageResponseModel<ArticleUserPageResponse>> authorPage(PageRequestModel<ArticleAuthorPageRequest> pageRequestModel);
 
@@ -41,8 +28,4 @@ public interface ArticleApiService {
     ResultModel adminOfficial(AdminBooleanRequest booleanRequest);
 
     ResultModel adminMarrow(AdminBooleanRequest booleanRequest);
-
-    ResultModel<PageResponseModel<ArticleQueryTypesResponse>> typePage(PageRequestModel<ArticleAdminTypePageRequest> pageRequestModel);
-
-    ResultModel typeAuditState(AdminBooleanRequest booleanRequest);
 }

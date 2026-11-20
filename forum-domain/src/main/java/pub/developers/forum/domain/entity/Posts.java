@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Posts extends BasePosts {
 
-    private ArticleType type;
-
     private String headImg;
 
     private Boolean official;

@@ -33,7 +33,7 @@ public class SearchArticleUpdateListener  extends EventBus.EventHandler<Pair<Art
         searchService.deleteByPostsId(newArticle.getId());
 
         searchService.save(Search.builder()
-                .content(newArticle.getMarkdownContent())
+                .content(newArticle.getHtmlContent())
                 .entityId(newArticle.getId())
                 .title(newArticle.getTitle())
                 .type(SearchTypeEn.POSTS)
