@@ -1,3 +1,13 @@
+---
+trigger: glob
+glob:
+  - "**/pom.xml"
+  - "local-run.sh"
+  - "forum-starter/src/main/resources/**"
+  - "**/logback*.xml"
+  - "**/application*.properties"
+  - "**/application*.yml"
+---
 <!-- 构建与环境配置：Maven 依赖、本地构建启动、日志与数据库配置位置；pom/sh/properties/logback 中生效 -->
 
 # 构建与环境配置

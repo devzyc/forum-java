@@ -1,4 +1,14 @@
-<!-- 敏感数据安全：日志与审计脱敏、口令不入规则；Controller/Manager/Util/持久化层生效 -->
+---
+trigger: glob
+glob:
+  - "forum-portal/src/main/java/pub/developers/forum/portal/controller/rest/UserRestController.java"
+  - "forum-facade/src/main/java/pub/developers/forum/facade/aspect/**/*.java"
+  - "forum-app/src/main/java/pub/developers/forum/app/manager/AbstractLoginManager.java"
+  - "forum-common/src/main/java/pub/developers/forum/common/support/**/*.java"
+  - "forum-infrastructure/src/main/java/pub/developers/forum/infrastructure/audit/**/*.java"
+  - "forum-infrastructure/src/main/java/pub/developers/forum/infrastructure/cache/**/*.java"
+---
+<!-- 敏感数据安全：日志与审计脱敏、口令不入规则；User登录接口/切面/Manager/Util/审计缓存持久化层生效 -->
 
 # 敏感数据与日志安全
 
