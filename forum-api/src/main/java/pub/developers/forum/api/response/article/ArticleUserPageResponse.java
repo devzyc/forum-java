@@ -25,10 +25,6 @@ public class ArticleUserPageResponse implements Serializable {
 
     private String auditState;
 
-    private String category;
-
-    private String categoryDesc;
-
     private Boolean official;
 
     private Boolean top;

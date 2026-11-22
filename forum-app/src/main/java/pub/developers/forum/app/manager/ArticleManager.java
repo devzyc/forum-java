@@ -116,7 +116,6 @@ public class ArticleManager extends AbstractPostsManager {
         ArticleAdminPageRequest request = pageRequestModel.getFilter();
 
         PostsPageQueryValue pageQueryValue = PostsPageQueryValue.builder()
-                .category(PostsCategoryEn.ARTICLE.getValue())
                 .authorId(request.getUserId())
                 .title(request.getTitle())
                 .official(request.getOfficial())
@@ -177,8 +176,6 @@ public class ArticleManager extends AbstractPostsManager {
     }
 
     private PageResponseModel<ArticleUserPageResponse> pageQuery(PageRequestModel pageRequestModel, PostsPageQueryValue pageQueryValue) {
-        pageQueryValue.setCategory(PostsCategoryEn.ARTICLE.getValue());
-
         PageResult<Article> pageResult = articleRepository.page(pageRequestModel.getPageNo(), pageRequestModel.getPageSize(), pageQueryValue);
 
         return PageResponseModel.build(pageResult.getTotal(), pageResult.getSize(), ArticleTransfer.toArticleUserPageResponses(pageResult.getList()));

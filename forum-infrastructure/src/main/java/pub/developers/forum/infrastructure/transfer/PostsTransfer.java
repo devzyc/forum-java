@@ -2,7 +2,6 @@ package pub.developers.forum.infrastructure.transfer;
 
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.common.enums.AuditStateEn;
-import pub.developers.forum.common.enums.PostsCategoryEn;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.*;
 import pub.developers.forum.infrastructure.dal.dataobject.PostsDO;
@@ -87,7 +86,6 @@ public class PostsTransfer {
 
     public static PostsDO toPostsDO(Article article) {
         PostsDO postsDO = PostsDO.builder()
-                .category(PostsCategoryEn.ARTICLE.getValue())
                 .commentId(0L)
                 .headImg(article.getHeadImg())
                 .marrow(article.getMarrow())
@@ -161,7 +159,6 @@ public class PostsTransfer {
         basePosts.setCreateAt(postsDO.getCreateAt());
         basePosts.setId(postsDO.getId());
 
-        basePosts.setCategory(PostsCategoryEn.valueOf(postsDO.getCategory()));
         basePosts.setTitle(postsDO.getTitle());
         basePosts.setAuditState(AuditStateEn.getEntity(postsDO.getAuditState()));
         basePosts.setHtmlContent(postsDO.getHtmlContent());

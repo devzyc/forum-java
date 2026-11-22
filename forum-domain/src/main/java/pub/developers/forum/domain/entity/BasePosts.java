@@ -2,7 +2,6 @@ package pub.developers.forum.domain.entity;
 
 import lombok.Data;
 import pub.developers.forum.common.enums.AuditStateEn;
-import pub.developers.forum.common.enums.PostsCategoryEn;
 
 import java.util.Set;
 
@@ -15,8 +14,6 @@ import java.util.Set;
 public class BasePosts extends BaseEntity {
 
     private AuditStateEn auditState;
-
-    private PostsCategoryEn category;
 
     private User author;
 

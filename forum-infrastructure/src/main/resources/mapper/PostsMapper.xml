@@ -9,7 +9,6 @@
         <id column="update_at" property="updateAt"/>
 
         <result column="audit_state" property="auditState"/>
-        <result column="category" property="category"/>
         <result column="author_id" property="authorId"/>
         <result column="title" property="title"/>
         <result column="html_content" property="htmlContent"/>
@@ -26,7 +25,7 @@
 
     <sql id="all_column">
         id, is_delete, create_at, update_at,
-        audit_state, category, author_id, title, html_content,
+        audit_state, author_id, title, html_content,
         views, approvals, comments, head_img, official, top, sort, marrow, comment_id
     </sql>
 
@@ -37,9 +36,6 @@
             is_delete = 0
             <if test="auditState != null">
                 and audit_state = #{auditState}
-            </if>
-            <if test="category != null">
-                and category = #{category}
             </if>
             <if test="authorId != null">
                 and author_id = #{authorId}
@@ -89,9 +85,6 @@
                     #{auditState}
                 </foreach>
             </if>
-            <if test="category != null">
-                and category = #{category}
-            </if>
             <if test="authorId != null">
                 and author_id = #{authorId}
             </if>
@@ -118,12 +111,11 @@
 
     <insert id="insert" useGeneratedKeys="true" keyColumn="id" keyProperty="id" parameterType="pub.developers.forum.infrastructure.dal.dataobject.PostsDO">
         INSERT INTO <include refid="table_name"/>
-        ( audit_state, category, author_id, title, html_content,
+        ( audit_state, author_id, title, html_content,
         views, approvals, comments, head_img, official, top, sort, marrow, comment_id, create_at )
         VALUES
         (
         #{auditState},
-        #{category},
         #{authorId},
         #{title},
         #{htmlContent},
@@ -159,7 +151,6 @@
         <set>
             <if test ='null != isDelete'>is_delete = #{isDelete},</if>
             <if test ='null != auditState'>audit_state = #{auditState},</if>
-            <if test ='null != category'>category = #{category},</if>
             <if test ='null != title'>title = #{title},</if>
             <if test ='null != htmlContent'>html_content = #{htmlContent},</if>
             <if test ='null != views'>views = #{views},</if>
@@ -198,14 +189,6 @@
         set views = views + 1, update_at = #{updateAt}
         where id = #{id}
     </update>
-
-    <select id="queryOrderViews" resultMap="resultMap">
-        select <include refid="all_column"/>
-        from <include refid="table_name"/>
-        where audit_state = #{auditState}
-        and category = #{category}
-        order by views desc
-    </select>
 
     <select id="queryInIds" resultMap="resultMap">
         select <include refid="all_column"/>

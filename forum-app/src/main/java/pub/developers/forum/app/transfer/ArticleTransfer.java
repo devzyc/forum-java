@@ -6,7 +6,6 @@ import pub.developers.forum.api.response.article.ArticleUserPageResponse;
 import pub.developers.forum.api.vo.TagVO;
 import pub.developers.forum.app.support.LoginUserContext;
 import pub.developers.forum.common.enums.AuditStateEn;
-import pub.developers.forum.common.enums.PostsCategoryEn;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.Article;
 import pub.developers.forum.domain.entity.Tag;
@@ -49,8 +48,6 @@ public class ArticleTransfer {
         return SafesUtil.ofList(articles).stream().map(article -> {
             return ArticleUserPageResponse.builder()
                     .auditState(article.getAuditState().getDesc())
-                    .category(PostsCategoryEn.ARTICLE.getValue())
-                    .categoryDesc(PostsCategoryEn.ARTICLE.getDesc())
                     .authorAvatar(article.getAuthor().getAvatar())
                     .authorId(article.getAuthor().getId())
                     .authorNickname(article.getAuthor().getNickname())

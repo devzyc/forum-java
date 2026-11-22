@@ -56,12 +56,8 @@ public class MessageApprovalCreateListener extends EventBus.EventHandler<Pair<Lo
                         .id(userId.toString())
                         .type(IdValueTypeEn.USER_ID)
                         .build())
+                .type(MessageTypeEn.APPROVAL_ARTICLE)
                 .build();
-        if (PostsCategoryEn.ARTICLE.equals(basePosts.getCategory())) {
-            message.setType(MessageTypeEn.APPROVAL_ARTICLE);
-        } else {
-            return;
-        }
 
         messageRepository.save(message);
     }

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 import pub.developers.forum.common.enums.AuditStateEn;
 import pub.developers.forum.common.enums.ErrorCodeEn;
-import pub.developers.forum.common.enums.PostsCategoryEn;
 import pub.developers.forum.common.exception.BizException;
 import pub.developers.forum.common.model.PageRequest;
 import pub.developers.forum.common.model.PageResult;

@@ -3,7 +3,6 @@ package pub.developers.forum.app.transfer;
 import pub.developers.forum.api.vo.PostsVO;
 import pub.developers.forum.api.vo.SolutionVO;
 import pub.developers.forum.api.vo.TagVO;
-import pub.developers.forum.common.enums.PostsCategoryEn;
 import pub.developers.forum.common.support.SafesUtil;
 import pub.developers.forum.domain.entity.Comment;
 import pub.developers.forum.domain.entity.Posts;
@@ -34,8 +33,6 @@ public class PostsTransfer {
             }
 
             PostsVO postsVO = PostsVO.builder()
-                    .category(posts.getCategory().getValue())
-                    .categoryDesc(posts.getCategory().getDesc())
                     .authorAvatar(posts.getAuthor().getAvatar())
                     .authorId(posts.getAuthor().getId())
                     .authorNickname(posts.getAuthor().getNickname())

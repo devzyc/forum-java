@@ -19,8 +19,6 @@ import java.util.List;
 @NoArgsConstructor
 public class PostsPageQueryValue implements Serializable {
 
-    private String category;
-
     private List<String> auditStates;
 
     private Long authorId;

@@ -31,8 +31,6 @@ public interface PostsDAO {
 
     void increaseViews(@Param("id") Long id, @Param("updateAt") Date updateAt);
 
-    List<PostsDO> queryOrderViews(@Param("category") String category, @Param("auditState") String auditState);
-
     List<PostsDO> queryInIds(@Param("ids") Set<Long> ids);
 
     List<PostsDO> queryInIdsAndState(@Param("ids") Set<Long> ids, @Param("auditState") String auditState);

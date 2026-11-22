@@ -83,7 +83,6 @@ DROP TABLE IF EXISTS `forum_posts`;
 CREATE TABLE `forum_posts` (
   `id` bigint(11) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `audit_state` varchar(64) NOT NULL COMMENT '审核状态',
-  `category` varchar(64) NOT NULL COMMENT '类别',
   `author_id` bigint(11) NOT NULL COMMENT '作者ID',
   `title` varchar(256) NOT NULL COMMENT '标题',
   `html_content` longtext NULL COMMENT 'html内容',
@@ -101,7 +100,7 @@ CREATE TABLE `forum_posts` (
   `update_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录修改时间',
   PRIMARY KEY (`id`),
   KEY `idx_author` (`author_id`),
-  KEY `idx_category_state_views` (`category`,`audit_state`,`views`) USING BTREE
+  KEY `idx_state_views` (`audit_state`,`views`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='帖子表';
 
 -- ----------------------------

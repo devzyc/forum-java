@@ -18,8 +18,6 @@ public class PostsDO extends BaseDO {
 
     private String auditState;
 
-    private String category;
-
     private Long authorId;
 
     private String title;

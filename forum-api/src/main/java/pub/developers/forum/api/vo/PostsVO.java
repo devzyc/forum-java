@@ -30,10 +30,6 @@ public class PostsVO implements Serializable {
 
     private Long id;
 
-    private String category;
-
-    private String categoryDesc;
-
     private String title;
 
     private String introduction;

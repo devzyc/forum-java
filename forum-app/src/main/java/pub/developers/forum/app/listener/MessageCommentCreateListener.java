@@ -48,13 +48,13 @@ public class MessageCommentCreateListener extends EventBus.EventHandler<Map<Stri
         }
 
         // 通知帖子作者
-        saveCommentMessage(basePosts.getCategory(), basePosts.getId(), basePosts.getAuthorId(), sender);
+        saveCommentMessage(basePosts.getId(), basePosts.getAuthorId(), sender);
 
         // 通知被回复人
         if (!ObjectUtils.isEmpty(comment.getReplyId())) {
             Comment reply = commentRepository.get(comment.getReplyId());
             if (!ObjectUtils.isEmpty(reply)) {
-                saveCommentMessage(basePosts.getCategory(), basePosts.getId(), reply.getUserId(), sender);
+                saveCommentMessage(basePosts.getId(), reply.getUserId(), sender);
             }
         }
 
@@ -62,12 +62,12 @@ public class MessageCommentCreateListener extends EventBus.EventHandler<Map<Stri
         if (!ObjectUtils.isEmpty(comment.getReplyReplyId())) {
             Comment replyReply = commentRepository.get(comment.getReplyReplyId());
             if (!ObjectUtils.isEmpty(replyReply)) {
-                saveCommentMessage(basePosts.getCategory(), basePosts.getId(), replyReply.getUserId(), sender);
+                saveCommentMessage(basePosts.getId(), replyReply.getUserId(), sender);
             }
         }
     }
 
-    private void saveCommentMessage(PostsCategoryEn categoryEn, Long postsId, Long receiver, Long sender) {
+    private void saveCommentMessage(Long postsId, Long receiver, Long sender) {
         Message message = Message.builder()
                 .channel(MessageChannelEn.STATION_LETTER)
                 .receiver(IdValue.builder()
@@ -82,13 +82,8 @@ public class MessageCommentCreateListener extends EventBus.EventHandler<Map<Stri
                         .id(sender.toString())
                         .type(IdValueTypeEn.USER_ID)
                         .build())
+                .type(MessageTypeEn.COMMENT_ARTICLE)
                 .build();
-
-        if (PostsCategoryEn.ARTICLE.equals(categoryEn)) {
-            message.setType(MessageTypeEn.COMMENT_ARTICLE);
-        } else {
-            return;
-        }
 
         messageRepository.save(message);
     }
